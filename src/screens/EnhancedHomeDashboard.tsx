@@ -1,13 +1,12 @@
-import { Bell, Calendar, CheckSquare, ShoppingCart, Users, Sparkles } from "lucide-react";
+import { Bell, Calendar, CheckSquare, ShoppingCart, Users, Sparkles, Clock } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { AICommandBar } from "@/components/oikos/AICommandBar";
-import { CalendarCard } from "@/components/oikos/CalendarCard";
-import { GroceryListCard } from "@/components/oikos/GroceryListCard";
 import { FamilyMembersCard } from "@/components/oikos/FamilyMembersCard";
 import { AIAgentPanel } from "@/components/oikos/AIAgentPanel";
 import { AISuggestionCard } from "@/components/oikos/AISuggestionCard";
 import { AIInsightCard } from "@/components/oikos/AIInsightCard";
 import { FloatingAIButton } from "@/components/oikos/FloatingAIButton";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -21,6 +20,7 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
   const [familyMembers, setFamilyMembers] = useState<Array<{ id: string; name: string; role: string; status: "active" | "away" }>>([]);
   const [unread, setUnread] = useState(0);
   const [openTasks, setOpenTasks] = useState(0);
+  const [taskPreview, setTaskPreview] = useState<Array<{ id: string; title: string; priority: string }>>([]);
 
   const greeting = useMemo(() => {
     const h = new Date().getHours();
@@ -76,6 +76,13 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
       .select("id", { count: "exact", head: true })
       .eq("completed", false)
       .then(({ count }: any) => setOpenTasks(count ?? 0));
+
+    (supabase.from("tasks") as any)
+      .select("id, title, priority")
+      .eq("completed", false)
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .limit(3)
+      .then(({ data }: any) => setTaskPreview(data ?? []));
   }, [user?.id]);
 
   const [suggestions, setSuggestions] = useState([
