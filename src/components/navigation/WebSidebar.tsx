@@ -28,7 +28,7 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
     { id: "home", label: t("dashboard"), icon: Home, color: "text-primary" },
     { id: "ai", label: t("ai_assistant"), icon: null, color: "text-accent", mascot: true },
     { id: "schedule", label: t("schedule"), icon: Calendar, color: "text-primary" },
-    { id: "tasks", label: t("tasks"), icon: CheckSquare, color: "text-secondary" },
+    { id: "tasks", label: t("tasks"), icon: CheckSquare, color: "text-primary" },
     { id: "grocery", label: t("grocery"), icon: ShoppingCart, color: "text-primary" },
     { id: "notifications", label: t("notifications"), icon: Bell, color: "text-primary" },
     { id: "family", label: t("family"), icon: Users, color: "text-primary" },
