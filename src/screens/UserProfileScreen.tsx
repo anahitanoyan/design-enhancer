@@ -87,14 +87,35 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
             </Avatar>
             <div className="flex-1">
               {editing ? (
-                <Input value={name} onChange={(e) => setName(e.target.value)} className="mb-2" />
+                <div className="space-y-2">
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" />
+                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" />
+                  <Select value={role} onValueChange={setRole}>
+                    <SelectTrigger><SelectValue placeholder="Role" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                      <SelectItem value="Member">Member</SelectItem>
+                      <SelectItem value="Child">Child</SelectItem>
+                      <SelectItem value="Guest">Guest</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Short bio" rows={2} />
+                </div>
               ) : (
-                <h3 className="text-xl mb-1">{name}</h3>
+                <>
+                  <h3 className="text-xl mb-1">{name}</h3>
+                  {phone && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+                      <Phone className="w-3 h-3" /> {phone}
+                    </p>
+                  )}
+                  {bio && <p className="text-xs text-muted-foreground mb-1">{bio}</p>}
+                </>
               )}
               <p className="text-sm text-muted-foreground mb-1">{user?.email}</p>
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
-                  Admin
+                  {role}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   Member since {memberSince}
