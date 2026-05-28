@@ -1,4 +1,4 @@
-import { Calendar, CheckSquare, ShoppingCart, Bell, Settings } from "lucide-react";
+import { Calendar, CheckSquare, ShoppingCart, Bell } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { AICommandBar } from "@/components/oikos/AICommandBar";
 import { TaskCard } from "@/components/oikos/TaskCard";
@@ -9,16 +9,111 @@ import { AISuggestionCard } from "@/components/oikos/AISuggestionCard";
 import { AIInsightCard } from "@/components/oikos/AIInsightCard";
 import { ConflictResolutionCard } from "@/components/oikos/ConflictResolutionCard";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 
 export function EnhancedWebDashboard() {
-  const [groceryItems, setGroceryItems] = useState([
-    { id: "1", name: "Milk", category: "Dairy", checked: false },
-    { id: "2", name: "Bread", category: "Bakery", checked: true },
-    { id: "3", name: "Apples", category: "Fruits", checked: false },
-    { id: "4", name: "Chicken", category: "Meat", checked: false }
-  ]);
+  const { user } = useAuth();
+  const [groceryItems, setGroceryItems] = useState<Array<{ id: string; name: string; category: string; checked: boolean }>>([]);
+  const [tasks, setTasks] = useState<Array<{ id: string; title: string; assignee: { name: string }; dueDate: string; priority: "low" | "medium" | "high"; category: string }>>([]);
+  const [familyMembers, setFamilyMembers] = useState<Array<{ id: string; name: string; role: string; status: "active" | "away" }>>([]);
+  const [weekEvents, setWeekEvents] = useState<Array<{ day: number; time: string; title: string; attendee: string; color: string }>>([]);
+  const [alerts, setAlerts] = useState<Array<{ id: string; title: string; message: string; type: "alert" | "success" | "info"; time: string; urgent: boolean }>>([]);
+
+  const firstName = (user?.user_metadata?.display_name as string)?.split(" ")[0] || user?.email?.split("@")[0] || "there";
+  const greeting = useMemo(() => {
+    const h = new Date().getHours();
+    return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+  }, []);
+  const todayLabel = useMemo(
+    () => new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" }),
+    []
+  );
+
+  const { weekDays, weekDates, todayIdx } = useMemo(() => {
+    const today = new Date();
+    const dow = (today.getDay() + 6) % 7; // Mon=0..Sun=6
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - dow);
+    monday.setHours(0, 0, 0, 0);
+    const labels: string[] = []; const dates: number[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday); d.setDate(monday.getDate() + i);
+      labels.push(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i]);
+      dates.push(d.getDate());
+    }
+    return { weekDays: labels, weekDates: dates, todayIdx: dow, monday };
+  }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const today = new Date();
+    const dow = (today.getDay() + 6) % 7;
+    const monday = new Date(today); monday.setDate(today.getDate() - dow); monday.setHours(0, 0, 0, 0);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 7);
+
+    (supabase.from("events") as any)
+      .select("id, title, starts_at, attendees")
+      .gte("starts_at", monday.toISOString())
+      .lt("starts_at", sunday.toISOString())
+      .order("starts_at", { ascending: true })
+      .then(({ data }: any) => {
+        const colors = ["bg-primary", "bg-secondary", "bg-accent"];
+        setWeekEvents((data ?? []).map((e: any, i: number) => {
+          const d = new Date(e.starts_at);
+          return {
+            day: (d.getDay() + 6) % 7,
+            time: d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+            title: e.title,
+            attendee: Array.isArray(e.attendees) && e.attendees[0] ? String(e.attendees[0]) : "",
+            color: colors[i % colors.length],
+          };
+        }));
+      });
+
+    (supabase.from("grocery_items") as any)
+      .select("id, name, category, checked")
+      .order("created_at", { ascending: false })
+      .limit(8)
+      .then(({ data }: any) => setGroceryItems(data ?? []));
+
+    (supabase.from("tasks") as any)
+      .select("id, title, assignee, due_date, priority, category, completed")
+      .eq("completed", false)
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .limit(5)
+      .then(({ data }: any) => setTasks((data ?? []).map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        assignee: { name: t.assignee || "Unassigned" },
+        dueDate: t.due_date ? new Date(t.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "—",
+        priority: (t.priority as "low" | "medium" | "high") || "medium",
+        category: t.category || "General",
+      }))));
+
+    (supabase.from("family_members") as any)
+      .select("id, name, role, status")
+      .limit(8)
+      .then(({ data }: any) => setFamilyMembers((data ?? []).map((m: any) => ({
+        id: m.id, name: m.name, role: m.role, status: m.status === "away" ? "away" : "active",
+      }))));
+
+    (supabase.from("notifications") as any)
+      .select("id, title, message, type, urgent, created_at")
+      .eq("read", false)
+      .order("created_at", { ascending: false })
+      .limit(3)
+      .then(({ data }: any) => setAlerts((data ?? []).map((n: any) => ({
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        type: (["alert", "success", "info"].includes(n.type) ? n.type : "info") as "alert" | "success" | "info",
+        time: new Date(n.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+        urgent: !!n.urgent,
+      }))));
+  }, [user?.id]);
 
   const [suggestions, setSuggestions] = useState([
     {
@@ -74,45 +169,11 @@ export function EnhancedWebDashboard() {
     }
   };
 
-  const tasks = [
-    {
-      id: "1",
-      title: "Clean garage",
-      assignee: { name: "John Doe" },
-      dueDate: "Apr 22",
-      priority: "medium" as const,
-      category: "Home"
-    },
-    {
-      id: "2",
-      title: "Buy birthday gift",
-      assignee: { name: "Jane Doe" },
-      dueDate: "Apr 23",
-      priority: "high" as const,
-      category: "Personal"
-    }
-  ];
-
-  const familyMembers = [
-    { id: "1", name: "John Doe", role: "Parent", status: "active" as const },
-    { id: "2", name: "Jane Doe", role: "Parent", status: "active" as const },
-    { id: "3", name: "Sarah Doe", role: "Child", status: "away" as const },
-    { id: "4", name: "Mike Doe", role: "Child", status: "active" as const }
-  ];
-
-  const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const weekDates = [19, 20, 21, 22, 23, 24, 25];
-
-  const events = [
-    { day: 2, time: "9:00 AM", title: "Team Meeting", attendee: "John", color: "bg-primary" },
-    { day: 2, time: "12:30 PM", title: "Lunch", attendee: "Jane", color: "bg-secondary" },
-    { day: 2, time: "4:00 PM", title: "Soccer", attendee: "Sarah", color: "bg-accent" }
-  ];
-
-  const toggleGroceryItem = (id: string) => {
-    setGroceryItems(items =>
-      items.map(item => item.id === id ? { ...item, checked: !item.checked } : item)
-    );
+  const toggleGroceryItem = async (id: string) => {
+    const item = groceryItems.find((i) => i.id === id);
+    if (!item) return;
+    setGroceryItems((items) => items.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i)));
+    await (supabase.from("grocery_items") as any).update({ checked: !item.checked }).eq("id", id);
   };
 
   return (
@@ -121,7 +182,7 @@ export function EnhancedWebDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Tuesday, April 21, 2026 • Good morning, John</p>
+          <p className="text-muted-foreground">{todayLabel} • {greeting}, {firstName}</p>
         </div>
 
         {/* Main Grid */}
@@ -179,8 +240,8 @@ export function EnhancedWebDashboard() {
 
               <div className="grid grid-cols-7 gap-3 mb-6">
                 {weekDays.map((day, idx) => {
-                  const isToday = idx === 2;
-                  const dayEvents = events.filter(e => e.day === idx);
+                  const isToday = idx === todayIdx;
+                  const dayEvents = weekEvents.filter(e => e.day === idx);
 
                   return (
                     <div key={idx} className="text-center">
@@ -205,8 +266,8 @@ export function EnhancedWebDashboard() {
               </div>
 
               <div className="space-y-2">
-                {events
-                  .filter(e => e.day === 2)
+                {weekEvents
+                  .filter(e => e.day === todayIdx)
                   .map((event, idx) => (
                     <div
                       key={idx}
@@ -217,13 +278,18 @@ export function EnhancedWebDashboard() {
                         <h4 className="text-sm">{event.title}</h4>
                         <p className="text-xs text-muted-foreground">{event.time}</p>
                       </div>
-                      <Avatar className="w-7 h-7">
-                        <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                          {event.attendee[0]}
-                        </AvatarFallback>
-                      </Avatar>
+                      {event.attendee && (
+                        <Avatar className="w-7 h-7">
+                          <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                            {event.attendee[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
                     </div>
                   ))}
+                {weekEvents.filter(e => e.day === todayIdx).length === 0 && (
+                  <div className="text-sm text-muted-foreground text-center py-4">No events today.</div>
+                )}
               </div>
             </GlassCard>
           </div>
@@ -238,7 +304,9 @@ export function EnhancedWebDashboard() {
                 </div>
               </div>
               <div className="space-y-3">
-                {tasks.map(task => (
+                {tasks.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No active tasks. 🎉</div>
+                ) : tasks.map(task => (
                   <TaskCard key={task.id} {...task} />
                 ))}
               </div>
@@ -256,7 +324,9 @@ export function EnhancedWebDashboard() {
               </div>
 
               <div className="space-y-2">
-                {groceryItems.map((item) => (
+                {groceryItems.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">Your list is empty.</div>
+                ) : groceryItems.map((item) => (
                   <label
                     key={item.id}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/30 cursor-pointer transition-colors"
@@ -280,13 +350,11 @@ export function EnhancedWebDashboard() {
               </div>
 
               <div className="space-y-3">
-                <NotificationCard
-                  title="Schedule Conflict"
-                  message="Soccer overlaps with dentist on Monday"
-                  type="alert"
-                  time="5 min ago"
-                  urgent
-                />
+                {alerts.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">All caught up. No alerts.</div>
+                ) : alerts.map(a => (
+                  <NotificationCard key={a.id} title={a.title} message={a.message} type={a.type} time={a.time} urgent={a.urgent} />
+                ))}
               </div>
             </GlassCard>
           </div>
