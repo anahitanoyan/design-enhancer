@@ -1,62 +1,77 @@
-import { ArrowLeft, TrendingUp, Calendar, CheckSquare, ShoppingCart, Clock, Users, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, TrendingUp, Calendar, CheckSquare, Sparkles } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { StatusBadge } from "@/components/oikos/StatusBadge";
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function AnalyticsDashboard({ onBack }: { onBack: () => void }) {
-  const weeklyData = [
-    { day: "Mon", tasks: 8, events: 3, grocery: 2 },
-    { day: "Tue", tasks: 12, events: 5, grocery: 1 },
-    { day: "Wed", tasks: 6, events: 4, grocery: 3 },
-    { day: "Thu", tasks: 9, events: 2, grocery: 1 },
-    { day: "Fri", tasks: 15, events: 6, grocery: 2 },
-    { day: "Sat", tasks: 4, events: 1, grocery: 4 },
-    { day: "Sun", tasks: 3, events: 2, grocery: 1 }
-  ];
+  const { user } = useAuth();
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [grocery, setGrocery] = useState<any[]>([]);
 
-  const taskDistribution = [
-    { name: "John", value: 35, color: "#0F3D5E" },
-    { name: "Jane", value: 28, color: "#1E6F8C" },
-    { name: "Sarah", value: 20, color: "#4FB3BF" },
-    { name: "Mike", value: 17, color: "#FF9800" }
-  ];
+  useEffect(() => {
+    if (!user?.id) return;
+    const since = new Date(); since.setDate(since.getDate() - 28);
+    (supabase.from("tasks") as any).select("id, completed, due_date, created_at, assignee, category")
+      .gte("created_at", since.toISOString()).then(({ data }: any) => setTasks(data ?? []));
+    (supabase.from("events") as any).select("id, starts_at, event_type")
+      .gte("starts_at", since.toISOString()).then(({ data }: any) => setEvents(data ?? []));
+    (supabase.from("grocery_items") as any).select("id, created_at, checked")
+      .gte("created_at", since.toISOString()).then(({ data }: any) => setGrocery(data ?? []));
+  }, [user?.id]);
 
-  const productivity = [
-    { week: "Week 1", completed: 45, total: 52 },
-    { week: "Week 2", completed: 52, total: 58 },
-    { week: "Week 3", completed: 48, total: 55 },
-    { week: "Week 4", completed: 61, total: 65 }
-  ];
+  const weeklyData = useMemo(() => {
+    const start = new Date(); start.setDate(start.getDate() - 6); start.setHours(0, 0, 0, 0);
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      return { day: DAYS[d.getDay()], date: d.toDateString(), tasks: 0, events: 0, grocery: 0 };
+    });
+    const key = (d: Date) => d.toDateString();
+    tasks.forEach((t) => { const d = days.find((x) => x.date === key(new Date(t.created_at))); if (d) d.tasks++; });
+    events.forEach((e) => { const d = days.find((x) => x.date === key(new Date(e.starts_at))); if (d) d.events++; });
+    grocery.forEach((g) => { const d = days.find((x) => x.date === key(new Date(g.created_at))); if (d) d.grocery++; });
+    return days.map(({ date, ...rest }) => rest);
+  }, [tasks, events, grocery]);
+
+  const taskDistribution = useMemo(() => {
+    const palette = ["#0F3D5E", "#1E6F8C", "#4FB3BF", "#FF9800", "#9C27B0"];
+    const map = new Map<string, number>();
+    tasks.forEach((t) => { const k = t.assignee || "Unassigned"; map.set(k, (map.get(k) ?? 0) + 1); });
+    return Array.from(map.entries()).slice(0, 5).map(([name, value], i) => ({ name, value, color: palette[i] }));
+  }, [tasks]);
+
+  const productivity = useMemo(() => {
+    const weeks = Array.from({ length: 4 }, (_, i) => {
+      const end = new Date(); end.setDate(end.getDate() - (3 - i) * 7);
+      const start = new Date(end); start.setDate(end.getDate() - 6);
+      return { label: `Week ${i + 1}`, start, end, completed: 0, total: 0 };
+    });
+    tasks.forEach((t) => {
+      const c = new Date(t.created_at);
+      const w = weeks.find((wk) => c >= wk.start && c <= wk.end);
+      if (w) { w.total++; if (t.completed) w.completed++; }
+    });
+    return weeks.map((w) => ({ week: w.label, completed: w.completed, total: w.total }));
+  }, [tasks]);
+
+  const completedCount = tasks.filter((t) => t.completed).length;
+  const completionRate = tasks.length ? Math.round((completedCount / tasks.length) * 100) : 0;
+  const avgPerDay = (tasks.length / 28).toFixed(1);
+  const peakDay = useMemo(() => {
+    if (!weeklyData.length) return "—";
+    return weeklyData.reduce((a, b) => (b.tasks > a.tasks ? b : a)).day;
+  }, [weeklyData]);
 
   const insights = [
-    {
-      title: "Peak Productivity",
-      value: "Friday",
-      change: "+23%",
-      trend: "up" as const,
-      description: "Most tasks completed on Fridays"
-    },
-    {
-      title: "Average Tasks/Day",
-      value: "8.4",
-      change: "+12%",
-      trend: "up" as const,
-      description: "Increased from last month"
-    },
-    {
-      title: "On-Time Completion",
-      value: "94%",
-      change: "+5%",
-      trend: "up" as const,
-      description: "Tasks completed by deadline"
-    },
-    {
-      title: "Time Saved by AI",
-      value: "12 hrs",
-      change: "+8 hrs",
-      trend: "up" as const,
-      description: "This month vs last month"
-    }
+    { title: "Peak Day", value: peakDay, change: `${tasks.length} tasks`, trend: "up" as const, description: "Last 7 days" },
+    { title: "Avg Tasks/Day", value: avgPerDay, change: "28d avg", trend: "up" as const, description: "Across last 4 weeks" },
+    { title: "Completion Rate", value: `${completionRate}%`, change: `${completedCount}/${tasks.length}`, trend: "up" as const, description: "Tasks completed" },
+    { title: "Events Logged", value: String(events.length), change: "28d", trend: "up" as const, description: "Across calendar" },
   ];
 
   return (
