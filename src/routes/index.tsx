@@ -1,29 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { OnboardingScreen } from "@/screens/OnboardingScreen";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "OikOS — AI Operating System for Household Life" },
+      { name: "description", content: "OikOS is your AI-powered household command center for schedules, tasks, grocery lists, and family coordination." },
+      { property: "og:title", content: "OikOS — AI Operating System for Household Life" },
+      { property: "og:description", content: "Your AI-powered household command center." },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && localStorage.getItem("oikos.onboarded") === "true") {
+      navigate({ to: "/dashboard", replace: true });
+    }
+  }, [navigate]);
+
+  const handleComplete = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("oikos.onboarded", "true");
+    }
+    navigate({ to: "/dashboard" });
+  };
+
+  return <OnboardingScreen onComplete={handleComplete} />;
 }
