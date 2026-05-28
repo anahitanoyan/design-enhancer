@@ -15,15 +15,17 @@ const SUGGESTIONS = [
 ];
 
 export function AIChat({ onBack, context }: { onBack: () => void; context?: string }) {
+  const tokenRef = useRef<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => { tokenRef.current = data.session?.access_token ?? null; });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => { tokenRef.current = s?.access_token ?? null; });
+    return () => sub.subscription.unsubscribe();
+  }, []);
   const transport = useRef(
     new DefaultChatTransport({
       api: "/api/chat",
       body: { context },
-      headers: async () => {
-        const { data } = await supabase.auth.getSession();
-        const token = data.session?.access_token;
-        return token ? { Authorization: `Bearer ${token}` } : {};
-      },
+      headers: (): Record<string, string> => (tokenRef.current ? { Authorization: `Bearer ${tokenRef.current}` } : {}),
     })
   ).current;
   const { messages, sendMessage, status, error } = useChat({
