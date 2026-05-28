@@ -22,7 +22,7 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
     else toast.success("Signed out");
   };
 
-  const navItems = [
+  const navItems: Array<{ id: string; label: string; icon: typeof Home | null; color: string; mascot?: boolean }> = [
     { id: "home", label: "Dashboard", icon: Home, color: "text-primary" },
     { id: "ai", label: "AI Assistant", icon: null, color: "text-accent", mascot: true },
     { id: "schedule", label: "Schedule", icon: Calendar, color: "text-primary" },
