@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { EnhancedHomeDashboard } from "@/screens/EnhancedHomeDashboard";
+import { EnhancedWebDashboard } from "@/screens/EnhancedWebDashboard";
 import { useScreenNav } from "@/lib/screen-nav";
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -16,5 +17,14 @@ export const Route = createFileRoute("/_app/dashboard")({
 
 function DashboardPage() {
   const { onNavigate } = useScreenNav();
-  return <EnhancedHomeDashboard onNavigate={onNavigate} />;
+  return (
+    <>
+      <div className="md:hidden">
+        <EnhancedHomeDashboard onNavigate={onNavigate} />
+      </div>
+      <div className="hidden md:block">
+        <EnhancedWebDashboard />
+      </div>
+    </>
+  );
 }
