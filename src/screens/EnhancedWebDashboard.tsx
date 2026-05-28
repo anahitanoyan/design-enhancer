@@ -14,6 +14,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 export function EnhancedWebDashboard() {
   const { user } = useAuth();
@@ -203,7 +204,20 @@ export function EnhancedWebDashboard() {
               <AISuggestionCard
                 key={suggestion.id}
                 suggestion={suggestion}
-                onAccept={(id) => setSuggestions(s => s.filter(item => item.id !== id))}
+                onAccept={async (id) => {
+                  const s = suggestions.find((x) => x.id === id);
+                  setSuggestions(arr => arr.filter(item => item.id !== id));
+                  if (!s) return;
+                  if (s.type === "task" && user?.id) {
+                    const { error } = await (supabase.from("tasks") as any).insert({
+                      owner_id: user.id, title: "AI: " + s.title, priority: "medium", description: s.description,
+                    });
+                    if (error) return toast.error("Could not apply: " + error.message);
+                    toast.success("Applied — task created", { action: { label: "View", onClick: () => navigate({ to: "/tasks" }) } });
+                    return;
+                  }
+                  toast.success(`Applied: ${s.title}`);
+                }}
                 onDismiss={(id) => setSuggestions(s => s.filter(item => item.id !== id))}
               />
             ))}

@@ -1,9 +1,10 @@
-import { ArrowLeft, Send, User, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, User, Loader2, CheckCircle2, AlertCircle, Wrench } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import mascotUrl from "@/assets/oikos-mascot.png";
 
 const SUGGESTIONS = [
@@ -14,7 +15,19 @@ const SUGGESTIONS = [
 ];
 
 export function AIChat({ onBack, context }: { onBack: () => void; context?: string }) {
-  const transport = useRef(new DefaultChatTransport({ api: "/api/chat", body: { context } })).current;
+  const tokenRef = useRef<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => { tokenRef.current = data.session?.access_token ?? null; });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => { tokenRef.current = s?.access_token ?? null; });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  const transport = useRef(
+    new DefaultChatTransport({
+      api: "/api/chat",
+      body: { context },
+      headers: (): Record<string, string> => (tokenRef.current ? { Authorization: `Bearer ${tokenRef.current}` } : {}),
+    })
+  ).current;
   const { messages, sendMessage, status, error } = useChat({
     transport,
     onError: (e) => toast.error(e.message || "Oik-Os couldn't reply. Try again."),
@@ -81,6 +94,7 @@ export function AIChat({ onBack, context }: { onBack: () => void; context?: stri
 
         {messages.map((m) => {
           const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
+          const toolParts = m.parts.filter((p: any) => typeof p.type === "string" && p.type.startsWith("tool-")) as any[];
           const isUser = m.role === "user";
           return (
             <div key={m.id} className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
@@ -100,6 +114,25 @@ export function AIChat({ onBack, context }: { onBack: () => void; context?: stri
                   </div>
                 ) : (
                   <div className="px-1 py-2">
+                    {toolParts.map((tp, i) => {
+                      const name = (tp.type as string).replace(/^tool-/, "");
+                      const state = tp.state as string | undefined;
+                      const out = tp.output as any;
+                      const isErr = out && typeof out === "object" && "error" in out;
+                      const running = state === "input-streaming" || state === "input-available";
+                      return (
+                        <div key={i} className="mb-2 text-xs rounded-lg border border-border/50 bg-card/40 px-3 py-2 flex items-center gap-2">
+                          {running ? <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                            : isErr ? <AlertCircle className="w-3.5 h-3.5 text-alert" />
+                            : <CheckCircle2 className="w-3.5 h-3.5 text-success" />}
+                          <Wrench className="w-3 h-3 text-muted-foreground" />
+                          <span className="font-medium">{name.replace(/_/g, " ")}</span>
+                          <span className="text-muted-foreground truncate">
+                            {running ? "running…" : isErr ? out.error : "done"}
+                          </span>
+                        </div>
+                      );
+                    })}
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{text || (isLoading ? "…" : "")}</p>
                   </div>
                 )}
