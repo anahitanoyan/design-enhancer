@@ -195,7 +195,7 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
           <div className="grid grid-cols-4 gap-2 mb-5">
             {[
               { icon: Calendar, label: "Today", value: todayEvents.length, tone: "from-primary/30 to-primary/5" },
-              { icon: CheckSquare, label: "Open", value: openTasks, tone: "from-accent/30 to-accent/5" },
+              { icon: CheckSquare, label: "Open", value: openTasks, tone: "from-primary/30 to-primary/5" },
               { icon: ShoppingCart, label: "Cart", value: groceryItems.filter(g => !g.checked).length, tone: "from-success/30 to-success/5" },
               { icon: Users, label: "Family", value: familyMembers.length, tone: "from-warning/30 to-warning/5" },
             ].map(({ icon: Icon, label, value, tone }) => (
@@ -252,7 +252,7 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
           <GlassCard className="p-4">
             <button onClick={() => onNavigate('tasks')} className="w-full text-left h-full flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <CheckSquare className="w-4 h-4 text-accent" />
+                <CheckSquare className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-medium">Tasks</h3>
               </div>
               <p className="text-2xl font-semibold mb-2">{openTasks}</p>
@@ -275,7 +275,7 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
           <GlassCard className="p-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4 text-success" />
+                <ShoppingCart className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-medium">Grocery</h3>
               </div>
               <button onClick={() => onNavigate('grocery')} className="text-[10px] text-primary">View</button>

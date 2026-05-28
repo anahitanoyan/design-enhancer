@@ -165,7 +165,7 @@ export function FamilyManagementScreen({ onBack }: { onBack: () => void }) {
             </div>
             <h3 className="mb-2">No members yet</h3>
             <p className="text-sm text-muted-foreground mb-4">Add the first member of your household.</p>
-            <Button onClick={openAdd} className="bg-gradient-to-r from-[#FF7E9D] to-[#7AB8E0] text-white">Add Member</Button>
+            <Button onClick={openAdd} className="bg-primary text-primary-foreground">Add Member</Button>
           </GlassCard>
         ) : (
           <div className="space-y-3">
@@ -249,7 +249,7 @@ export function FamilyManagementScreen({ onBack }: { onBack: () => void }) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-[#FF7E9D] to-[#7AB8E0] text-white">
+            <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? "Save changes" : "Add member"}
             </Button>
           </DialogFooter>
