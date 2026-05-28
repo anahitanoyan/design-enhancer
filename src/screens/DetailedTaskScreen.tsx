@@ -1,137 +1,157 @@
-import { ArrowLeft, Plus, CheckSquare, Filter, Search, Calendar, User, Flag } from "lucide-react";
+import { ArrowLeft, Plus, CheckSquare, Search, Trash2 } from "lucide-react";
 import { TaskCard } from "@/components/oikos/TaskCard";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StatusBadge } from "@/components/oikos/StatusBadge";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+
+type Priority = "low" | "medium" | "high";
+type Status = "todo" | "in_progress" | "done";
+type Task = {
+  id: string;
+  title: string;
+  description: string | null;
+  priority: Priority;
+  status: Status;
+  category: string | null;
+  assignee: string | null;
+  due_date: string | null;
+  completed: boolean;
+};
+
+function fmtDate(d: string | null) {
+  if (!d) return "No date";
+  return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
 export function DetailedTaskScreen({ onBack }: { onBack: () => void }) {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterBy, setFilterBy] = useState<"all" | "high" | "medium" | "low">("all");
+  const [filterBy, setFilterBy] = useState<"all" | Priority>("all");
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    priority: "medium" as Priority,
+    category: "Home",
+    assignee: "",
+    due_date: "",
+  });
 
-  const tasks = {
-    todo: [
-      {
-        id: "1",
-        title: "Clean garage",
-        assignee: { name: "John Doe" },
-        dueDate: "Apr 22",
-        priority: "medium" as const,
-        category: "Home",
-        description: "Organize tools and clean floor"
-      },
-      {
-        id: "2",
-        title: "Buy birthday gift for Sarah",
-        assignee: { name: "Jane Doe" },
-        dueDate: "Apr 23",
-        priority: "high" as const,
-        category: "Personal",
-        description: "Budget: $50, check wish list"
-      },
-      {
-        id: "3",
-        title: "Schedule dentist appointment",
-        assignee: { name: "Sarah Doe" },
-        dueDate: "Apr 25",
-        priority: "low" as const,
-        category: "Health",
-        description: "6-month checkup"
-      },
-      {
-        id: "4",
-        title: "Fix leaky faucet",
-        assignee: { name: "John Doe" },
-        dueDate: "Apr 24",
-        priority: "high" as const,
-        category: "Home",
-        description: "Kitchen sink needs new washer"
-      },
-      {
-        id: "5",
-        title: "Plan weekend trip",
-        assignee: { name: "Jane Doe" },
-        dueDate: "Apr 26",
-        priority: "low" as const,
-        category: "Personal",
-        description: "Research destinations and book hotel"
-      }
-    ],
-    inProgress: [
-      {
-        id: "6",
-        title: "Meal prep for week",
-        assignee: { name: "Jane Doe" },
-        dueDate: "Apr 21",
-        priority: "high" as const,
-        category: "Food",
-        description: "Prepare 5 dinners"
-      },
-      {
-        id: "7",
-        title: "Paint bedroom",
-        assignee: { name: "John Doe" },
-        dueDate: "Apr 23",
-        priority: "medium" as const,
-        category: "Home",
-        description: "Second coat needed"
-      }
-    ],
-    done: [
-      {
-        id: "8",
-        title: "Grocery shopping",
-        assignee: { name: "John Doe" },
-        dueDate: "Apr 20",
-        priority: "medium" as const,
-        category: "Food",
-        completed: true
-      },
-      {
-        id: "9",
-        title: "Water plants",
-        assignee: { name: "Mike Doe" },
-        dueDate: "Apr 20",
-        priority: "low" as const,
-        category: "Home",
-        completed: true
-      },
-      {
-        id: "10",
-        title: "Submit expense report",
-        assignee: { name: "Jane Doe" },
-        dueDate: "Apr 19",
-        priority: "high" as const,
-        category: "Work",
-        completed: true
-      }
-    ]
+  const load = async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("id,title,description,priority,status,category,assignee,due_date,completed")
+      .order("due_date", { ascending: true, nullsFirst: false });
+    if (error) toast.error(error.message);
+    setTasks((data as Task[]) ?? []);
+    setLoading(false);
   };
 
-  const taskStats = {
-    total: tasks.todo.length + tasks.inProgress.length + tasks.done.length,
-    completed: tasks.done.length,
-    overdue: 2,
-    highPriority: [...tasks.todo, ...tasks.inProgress].filter(t => t.priority === "high").length
+  useEffect(() => { load(); }, [user?.id]);
+
+  const createTask = async () => {
+    if (!user || !form.title.trim()) return;
+    const { error } = await supabase.from("tasks").insert({
+      owner_id: user.id,
+      title: form.title.trim(),
+      description: form.description.trim() || null,
+      priority: form.priority,
+      status: "todo",
+      category: form.category || null,
+      assignee: form.assignee.trim() || null,
+      due_date: form.due_date || null,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Task created");
+    setForm({ title: "", description: "", priority: "medium", category: "Home", assignee: "", due_date: "" });
+    setOpen(false);
+    load();
   };
 
-  const filterTasks = (taskList: any[]) => {
-    let filtered = taskList;
-
-    if (filterBy !== "all") {
-      filtered = filtered.filter(t => t.priority === filterBy);
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(t =>
-        t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    return filtered;
+  const cycleStatus = async (t: Task) => {
+    const next: Status = t.status === "todo" ? "in_progress" : t.status === "in_progress" ? "done" : "todo";
+    const { error } = await supabase
+      .from("tasks")
+      .update({ status: next, completed: next === "done" })
+      .eq("id", t.id);
+    if (error) return toast.error(error.message);
+    load();
   };
+
+  const removeTask = async (id: string) => {
+    const { error } = await supabase.from("tasks").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Task deleted");
+    load();
+  };
+
+  const filtered = useMemo(() => {
+    return tasks.filter((t) => {
+      if (filterBy !== "all" && t.priority !== filterBy) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        if (!t.title.toLowerCase().includes(q) && !(t.category ?? "").toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+  }, [tasks, filterBy, searchQuery]);
+
+  const grouped = useMemo(() => ({
+    todo: filtered.filter((t) => t.status === "todo"),
+    inProgress: filtered.filter((t) => t.status === "in_progress"),
+    done: filtered.filter((t) => t.status === "done" || t.completed),
+  }), [filtered]);
+
+  const taskStats = useMemo(() => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return {
+      total: tasks.length,
+      completed: tasks.filter((t) => t.status === "done" || t.completed).length,
+      overdue: tasks.filter((t) => t.due_date && !t.completed && new Date(t.due_date) < today).length,
+      highPriority: tasks.filter((t) => t.priority === "high" && !t.completed).length,
+    };
+  }, [tasks]);
+
+  const renderList = (list: Task[], empty: string) =>
+    list.length === 0 ? (
+      <GlassCard className="p-8 text-center">
+        <CheckSquare className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+        <p className="text-sm text-muted-foreground">{empty}</p>
+      </GlassCard>
+    ) : (
+      list.map((task) => (
+        <div key={task.id} className="relative group">
+          <TaskCard
+            title={task.title}
+            assignee={{ name: task.assignee || "Unassigned" }}
+            dueDate={fmtDate(task.due_date)}
+            priority={task.priority}
+            category={task.category || "General"}
+            completed={task.status === "done" || task.completed}
+            onClick={() => cycleStatus(task)}
+          />
+          <button
+            onClick={() => removeTask(task.id)}
+            className="absolute top-3 right-3 p-1.5 rounded-full bg-alert/10 text-alert opacity-0 group-hover:opacity-100 transition-opacity"
+            aria-label="Delete task"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ))
+    );
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FFF5F0] via-[#E8F4F8] to-[#F0F8FF]">
@@ -142,7 +162,7 @@ export function DetailedTaskScreen({ onBack }: { onBack: () => void }) {
         </button>
         <CheckSquare className="w-6 h-6 text-secondary" />
         <h2>Tasks</h2>
-        <button className="ml-auto p-2 rounded-full bg-primary text-primary-foreground">
+        <button onClick={() => setOpen(true)} className="ml-auto p-2 rounded-full bg-primary text-primary-foreground">
           <Plus className="w-5 h-5" />
         </button>
       </div>
@@ -232,56 +252,74 @@ export function DetailedTaskScreen({ onBack }: { onBack: () => void }) {
         <Tabs defaultValue="todo" className="w-full">
           <TabsList className="glass-card w-full grid grid-cols-3 mb-4">
             <TabsTrigger value="todo">
-              To Do <span className="ml-1 text-xs">({filterTasks(tasks.todo).length})</span>
+              To Do <span className="ml-1 text-xs">({grouped.todo.length})</span>
             </TabsTrigger>
             <TabsTrigger value="inProgress">
-              In Progress <span className="ml-1 text-xs">({filterTasks(tasks.inProgress).length})</span>
+              In Progress <span className="ml-1 text-xs">({grouped.inProgress.length})</span>
             </TabsTrigger>
             <TabsTrigger value="done">
-              Done <span className="ml-1 text-xs">({filterTasks(tasks.done).length})</span>
+              Done <span className="ml-1 text-xs">({grouped.done.length})</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="todo" className="space-y-3">
-            {filterTasks(tasks.todo).length === 0 ? (
-              <GlassCard className="p-8 text-center">
-                <CheckSquare className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-sm text-muted-foreground">No tasks found</p>
-              </GlassCard>
-            ) : (
-              filterTasks(tasks.todo).map(task => (
-                <TaskCard key={task.id} {...task} />
-              ))
-            )}
+            {loading ? <p className="text-sm text-muted-foreground text-center py-4">Loading…</p> : renderList(grouped.todo, "No tasks found")}
           </TabsContent>
 
           <TabsContent value="inProgress" className="space-y-3">
-            {filterTasks(tasks.inProgress).length === 0 ? (
-              <GlassCard className="p-8 text-center">
-                <CheckSquare className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-sm text-muted-foreground">No tasks in progress</p>
-              </GlassCard>
-            ) : (
-              filterTasks(tasks.inProgress).map(task => (
-                <TaskCard key={task.id} {...task} />
-              ))
-            )}
+            {renderList(grouped.inProgress, "No tasks in progress")}
           </TabsContent>
 
           <TabsContent value="done" className="space-y-3">
-            {filterTasks(tasks.done).length === 0 ? (
-              <GlassCard className="p-8 text-center">
-                <CheckSquare className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-sm text-muted-foreground">No completed tasks</p>
-              </GlassCard>
-            ) : (
-              filterTasks(tasks.done).map(task => (
-                <TaskCard key={task.id} {...task} />
-              ))
-            )}
+            {renderList(grouped.done, "No completed tasks")}
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>New Task</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Title</Label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="What needs to be done?" />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Optional notes" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Priority</Label>
+                <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v as Priority })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Category</Label>
+                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+              </div>
+              <div>
+                <Label>Assignee</Label>
+                <Input value={form.assignee} onChange={(e) => setForm({ ...form, assignee: e.target.value })} placeholder="Name" />
+              </div>
+              <div>
+                <Label>Due date</Label>
+                <Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={createTask} disabled={!form.title.trim()}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
