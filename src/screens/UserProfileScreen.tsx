@@ -1,20 +1,44 @@
-import { ArrowLeft, User, Bell, Lock, Palette, Globe, HelpCircle, LogOut, ChevronRight, Shield, CreditCard, Users, Sparkles, TrendingUp, Plus } from "lucide-react";
+import { ArrowLeft, User, Bell, Lock, Palette, Globe, HelpCircle, LogOut, ChevronRight, Shield, CreditCard, Users, Sparkles, TrendingUp, Plus, Loader2 } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { useAuth, getUserInitials } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; onNavigate?: (screen: string) => void }) {
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Admin",
-    avatar: "JD",
-    memberSince: "January 2026"
+  const { user } = useAuth();
+  const defaultName = (user?.user_metadata?.display_name as string) || user?.email?.split("@")[0] || "Member";
+  const [name, setName] = useState(defaultName);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const initials = getUserInitials(name, user?.email);
+  const memberSince = user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : "—";
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { error } = await supabase.auth.updateUser({ data: { display_name: name } });
+    setSaving(false);
+    if (error) toast.error(error.message);
+    else {
+      await supabase.from("profiles").update({ display_name: name }).eq("id", user?.id ?? "");
+      toast.success("Profile updated");
+      setEditing(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) toast.error(error.message);
+    else toast.success("Signed out");
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FFF5F0] via-[#E8F4F8] to-[#F0F8FF]">
+    <div className="min-h-screen flex flex-col bg-app-gradient">
       {/* Header */}
       <div className="glass-card rounded-none p-4 flex items-center gap-3 sticky top-0 z-10">
         <button onClick={onBack}>
@@ -29,27 +53,40 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
         <GlassCard className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <Avatar className="w-20 h-20">
-              <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-secondary text-white">
-                {user.avatar}
+              <AvatarFallback className="text-2xl bg-gradient-to-br from-[#FF7E9D] to-[#7AB8E0] text-white">
+                {initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h3 className="text-xl mb-1">{user.name}</h3>
-              <p className="text-sm text-muted-foreground mb-1">{user.email}</p>
+              {editing ? (
+                <Input value={name} onChange={(e) => setName(e.target.value)} className="mb-2" />
+              ) : (
+                <h3 className="text-xl mb-1">{name}</h3>
+              )}
+              <p className="text-sm text-muted-foreground mb-1">{user?.email}</p>
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
-                  {user.role}
+                  Admin
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Member since {user.memberSince}
+                  Member since {memberSince}
                 </span>
               </div>
             </div>
           </div>
 
-          <button className="w-full py-2 rounded-xl border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-            Edit Profile
-          </button>
+          {editing ? (
+            <div className="flex gap-2">
+              <Button onClick={handleSave} disabled={saving} className="flex-1 bg-gradient-to-r from-[#FF7E9D] to-[#7AB8E0] text-white">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+              </Button>
+              <Button variant="outline" onClick={() => { setName(defaultName); setEditing(false); }}>Cancel</Button>
+            </div>
+          ) : (
+            <button onClick={() => setEditing(true)} className="w-full py-2 rounded-xl border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
+              Edit Profile
+            </button>
+          )}
         </GlassCard>
 
         {/* AI Agents Configuration */}
@@ -313,7 +350,7 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
         </GlassCard>
 
         {/* Sign Out */}
-        <button className="w-full glass-card p-4 flex items-center justify-center gap-2 text-alert hover:bg-alert/10 transition-colors">
+        <button onClick={handleSignOut} className="w-full glass-card p-4 flex items-center justify-center gap-2 text-alert hover:bg-alert/10 transition-colors">
           <LogOut className="w-5 h-5" />
           <span className="font-medium">Sign Out</span>
         </button>
