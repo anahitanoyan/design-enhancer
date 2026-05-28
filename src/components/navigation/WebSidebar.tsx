@@ -5,6 +5,7 @@ import mascotUrl from "@/assets/oikos-mascot.png";
 import { useAuth, getUserInitials } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { usePrefs } from "@/lib/i18n";
 
 interface WebSidebarProps {
   currentScreen: string;
@@ -13,6 +14,7 @@ interface WebSidebarProps {
 
 export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
   const { user } = useAuth();
+  const { t } = usePrefs();
   const name = (user?.user_metadata?.display_name as string) || user?.email?.split("@")[0] || "Member";
   const initials = getUserInitials(name, user?.email);
 
@@ -23,15 +25,15 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
   };
 
   const navItems: Array<{ id: string; label: string; icon: typeof Home | null; color: string; mascot?: boolean }> = [
-    { id: "home", label: "Dashboard", icon: Home, color: "text-primary" },
-    { id: "ai", label: "AI Assistant", icon: null, color: "text-accent", mascot: true },
-    { id: "schedule", label: "Schedule", icon: Calendar, color: "text-primary" },
-    { id: "tasks", label: "Tasks", icon: CheckSquare, color: "text-secondary" },
-    { id: "grocery", label: "Grocery", icon: ShoppingCart, color: "text-primary" },
-    { id: "notifications", label: "Notifications", icon: Bell, color: "text-primary" },
-    { id: "family", label: "Family", icon: Users, color: "text-primary" },
-    { id: "analytics", label: "Analytics", icon: TrendingUp, color: "text-primary" },
-    { id: "settings", label: "Profile", icon: User, color: "text-primary" }
+    { id: "home", label: t("dashboard"), icon: Home, color: "text-primary" },
+    { id: "ai", label: t("ai_assistant"), icon: null, color: "text-accent", mascot: true },
+    { id: "schedule", label: t("schedule"), icon: Calendar, color: "text-primary" },
+    { id: "tasks", label: t("tasks"), icon: CheckSquare, color: "text-secondary" },
+    { id: "grocery", label: t("grocery"), icon: ShoppingCart, color: "text-primary" },
+    { id: "notifications", label: t("notifications"), icon: Bell, color: "text-primary" },
+    { id: "family", label: t("family"), icon: Users, color: "text-primary" },
+    { id: "analytics", label: t("analytics"), icon: TrendingUp, color: "text-primary" },
+    { id: "settings", label: t("profile"), icon: User, color: "text-primary" }
   ];
 
   return (
@@ -84,7 +86,7 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
           onClick={handleSignOut}
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-alert/10 hover:text-alert transition"
         >
-          <LogOut className="w-4 h-4" /> Sign out
+          <LogOut className="w-4 h-4" /> {t("sign_out")}
         </button>
       </div>
     </div>

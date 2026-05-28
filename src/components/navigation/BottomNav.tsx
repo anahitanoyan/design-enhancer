@@ -1,5 +1,6 @@
 import { Home, Calendar, CheckSquare, User } from "lucide-react";
 import mascotUrl from "@/assets/oikos-mascot.png";
+import { usePrefs } from "@/lib/i18n";
 
 interface BottomNavProps {
   currentScreen: string;
@@ -7,12 +8,13 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
+  const { t } = usePrefs();
   const navItems: Array<{ id: string; label: string; icon: typeof Home | null; mascot?: boolean }> = [
-    { id: "home", label: "Home", icon: Home },
-    { id: "schedule", label: "Schedule", icon: Calendar },
-    { id: "ai", label: "AI", icon: null, mascot: true },
-    { id: "tasks", label: "Tasks", icon: CheckSquare },
-    { id: "settings", label: "You", icon: User }
+    { id: "home", label: t("dashboard"), icon: Home },
+    { id: "schedule", label: t("schedule"), icon: Calendar },
+    { id: "ai", label: t("ai_assistant"), icon: null, mascot: true },
+    { id: "tasks", label: t("tasks"), icon: CheckSquare },
+    { id: "settings", label: t("profile"), icon: User }
   ];
 
   return (
