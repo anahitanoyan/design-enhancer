@@ -145,7 +145,7 @@ export function AIChat({ onBack, context }: { onBack: () => void; context?: stri
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF9B7A] to-[#FF7E9D] text-white flex items-center justify-center disabled:opacity-40 hover:opacity-90 transition shrink-0"
+            className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-40 hover:opacity-90 transition shrink-0"
             aria-label="Send"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
