@@ -305,7 +305,7 @@ export function EnhancedWebDashboard() {
             <GlassCard className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <CheckSquare className="w-5 h-5 text-secondary" />
+                  <CheckSquare className="w-5 h-5 text-primary" />
                   <h3>Active Tasks</h3>
                 </div>
               </div>

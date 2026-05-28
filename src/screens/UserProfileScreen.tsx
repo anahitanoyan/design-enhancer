@@ -1,17 +1,18 @@
-import { ArrowLeft, User, Bell, Lock, Palette, Globe, HelpCircle, LogOut, ChevronRight, Shield, CreditCard, Users, Sparkles, TrendingUp, Plus, Loader2, Phone } from "lucide-react";
+import { ArrowLeft, User, Bell, Lock, Palette, Globe, HelpCircle, LogOut, ChevronRight, Shield, CreditCard, Users, Sparkles, TrendingUp, Plus, Loader2, Phone, Camera, Key, Eye, Trash2 } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useAuth, getUserInitials } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePrefs, type Lang, type Theme } from "@/lib/i18n";
 
 export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; onNavigate?: (screen: string) => void }) {
@@ -24,13 +25,20 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
   const [role, setRole] = useState("Admin");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pw, setPw] = useState({ next: "", confirm: "" });
+  const [pwSaving, setPwSaving] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
   const initials = getUserInitials(name, user?.email);
   const memberSince = user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : "—";
 
   useEffect(() => {
     if (!user?.id) return;
     (supabase.from("profiles") as any)
-      .select("display_name, phone, bio, role")
+      .select("display_name, phone, bio, role, avatar_url")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }: any) => {
@@ -39,8 +47,36 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
         setPhone(data.phone ?? "");
         setBio(data.bio ?? "");
         setRole(data.role ?? "Admin");
+        setAvatarUrl(data.avatar_url ?? null);
       });
   }, [user?.id]);
+
+  const handleAvatarSelect = async (file: File | null) => {
+    if (!file || !user?.id) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { setUploading(false); toast.error(upErr.message); return; }
+    const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+    const url = pub.publicUrl;
+    const { error: pErr } = await (supabase.from("profiles") as any).update({ avatar_url: url }).eq("id", user.id);
+    await supabase.auth.updateUser({ data: { avatar_url: url } });
+    setUploading(false);
+    if (pErr) toast.error(pErr.message);
+    else { setAvatarUrl(url); toast.success("Photo updated"); }
+  };
+
+  const handleChangePassword = async () => {
+    if (pw.next.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    if (pw.next !== pw.confirm) { toast.error("Passwords do not match"); return; }
+    setPwSaving(true);
+    const { error } = await supabase.auth.updateUser({ password: pw.next });
+    setPwSaving(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Password updated"); setPwOpen(false); setPw({ next: "", confirm: "" }); }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -82,11 +118,30 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
         {/* Profile Header */}
         <GlassCard className="p-6">
           <div className="flex items-center gap-4 mb-4">
-            <Avatar className="w-20 h-20">
-              <AvatarFallback className="text-2xl bg-gradient-to-br from-[#FF7E9D] to-[#7AB8E0] text-white">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="w-20 h-20">
+                {avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}
+                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                type="button"
+                onClick={() => fileInput.current?.click()}
+                disabled={uploading}
+                aria-label="Upload photo"
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:opacity-90 disabled:opacity-50"
+              >
+                {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
+              <input
+                ref={fileInput}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleAvatarSelect(e.target.files?.[0] ?? null)}
+              />
+            </div>
             <div className="flex-1">
               {editing ? (
                 <div className="space-y-2">
@@ -128,7 +183,7 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
 
           {editing ? (
             <div className="flex gap-2">
-              <Button onClick={handleSave} disabled={saving} className="flex-1 bg-gradient-to-r from-[#FF7E9D] to-[#7AB8E0] text-white">
+              <Button onClick={handleSave} disabled={saving} className="flex-1 bg-primary text-primary-foreground">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
               </Button>
               <Button variant="outline" onClick={() => { setName(defaultName); setEditing(false); }}>Cancel</Button>
@@ -347,7 +402,7 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
 
           <Separator />
 
-          <button className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors">
+          <button onClick={() => setPrivacyOpen(true)} className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors">
             <div className="flex items-center gap-3">
               <Lock className="w-5 h-5 text-muted-foreground" />
               <span className="text-sm">Privacy & Security</span>
@@ -427,6 +482,85 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
           <p>© 2026 OikOS. All rights reserved.</p>
         </div>
       </div>
+
+      {/* Privacy & Security */}
+      <Dialog open={privacyOpen} onOpenChange={setPrivacyOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Privacy & Security</DialogTitle>
+            <DialogDescription>Manage how OikOS protects your household data.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <button onClick={() => { setPrivacyOpen(false); setPwOpen(true); }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/40 hover:bg-white/60 transition">
+              <Key className="w-4 h-4 text-primary" />
+              <div className="text-left flex-1">
+                <div className="text-sm font-medium">Change password</div>
+                <div className="text-xs text-muted-foreground">Update the password used to sign in.</div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white/40">
+              <div className="flex items-center gap-3">
+                <Eye className="w-4 h-4 text-primary" />
+                <div>
+                  <div className="text-sm font-medium">Two-factor authentication</div>
+                  <div className="text-xs text-muted-foreground">Add an extra layer of security.</div>
+                </div>
+              </div>
+              <Switch />
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white/40">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <div>
+                  <div className="text-sm font-medium">Allow AI to learn from my data</div>
+                  <div className="text-xs text-muted-foreground">Personalize suggestions over time.</div>
+                </div>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <button
+              onClick={async () => {
+                if (!confirm("Permanently sign out of all devices?")) return;
+                await supabase.auth.signOut({ scope: "global" });
+                toast.success("Signed out everywhere");
+                setPrivacyOpen(false);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-xl bg-alert/10 hover:bg-alert/20 text-alert transition"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="text-sm font-medium">Sign out of all devices</span>
+            </button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPrivacyOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={pwOpen} onOpenChange={setPwOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Change password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="pw-new">New password</Label>
+              <Input id="pw-new" type="password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="pw-confirm">Confirm password</Label>
+              <Input id="pw-confirm" type="password" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPwOpen(false)}>Cancel</Button>
+            <Button onClick={handleChangePassword} disabled={pwSaving} className="bg-primary text-primary-foreground">
+              {pwSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update password"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

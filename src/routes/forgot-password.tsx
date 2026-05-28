@@ -57,7 +57,7 @@ function ForgotPage() {
                   <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9 h-11" />
                 </div>
               </div>
-              <Button type="submit" disabled={submitting} className="w-full h-11 bg-gradient-to-r from-[#FF7E9D] to-[#7AB8E0] text-white">
+              <Button type="submit" disabled={submitting} className="w-full h-11 bg-primary text-primary-foreground">
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send reset link"}
               </Button>
             </form>

@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus, Calendar, ChevronLeft, ChevronRight, Clock, MapPin, Users, Sparkles, Pencil, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, MapPin, Users, Sparkles, Pencil, Trash2, Loader2, CalendarDays } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/oikos/StatusBadge";
@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 interface EventRow {
   id: string;
@@ -43,6 +45,8 @@ function startOfWeek(d: Date) {
 export function DetailedScheduleScreen({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
   const [weekOffset, setWeekOffset] = useState(0);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
   const [events, setEvents] = useState<EventRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -80,6 +84,21 @@ export function DetailedScheduleScreen({ onBack }: { onBack: () => void }) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadEvents(); }, [user?.id, weekStart.toISOString()]);
+
+  // Load summary of all event dates for calendar dots
+  useEffect(() => {
+    if (!user?.id) return;
+    (supabase.from("events") as any)
+      .select("starts_at")
+      .then(({ data }: any) => {
+        const map: Record<string, number> = {};
+        (data ?? []).forEach((e: any) => {
+          const k = new Date(e.starts_at).toDateString();
+          map[k] = (map[k] ?? 0) + 1;
+        });
+        setEventCounts(map);
+      });
+  }, [user?.id, events.length]);
 
   const getDayEvents = (idx: number) =>
     events.filter(e => new Date(e.starts_at).toDateString() === weekDates[idx].toDateString());
@@ -142,9 +161,39 @@ export function DetailedScheduleScreen({ onBack }: { onBack: () => void }) {
     <div className="min-h-screen flex flex-col">
       <div className="glass-card rounded-none p-4 flex items-center gap-3 sticky top-0 z-10">
         <button onClick={onBack}><ArrowLeft className="w-6 h-6" /></button>
-        <Calendar className="w-6 h-6 text-primary" />
+        <CalendarIcon className="w-6 h-6 text-primary" />
         <h2>Schedule</h2>
-        <button onClick={openCreate} className="ml-auto p-2 rounded-full bg-primary text-primary-foreground">
+        <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+          <PopoverTrigger asChild>
+            <button className="ml-auto p-2 rounded-full bg-secondary text-secondary-foreground" aria-label="Jump to date">
+              <CalendarDays className="w-5 h-5" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-auto p-0">
+            <Calendar
+              mode="single"
+              captionLayout="dropdown"
+              startMonth={new Date(1970, 0)}
+              endMonth={new Date(2100, 11)}
+              defaultMonth={weekDates[selectedDay] ?? new Date()}
+              modifiers={{
+                hasEvents: (d) => (eventCounts[d.toDateString()] ?? 0) > 0,
+              }}
+              modifiersClassNames={{ hasEvents: "font-bold text-primary" }}
+              onSelect={(d) => {
+                if (!d) return;
+                const today = startOfWeek(new Date());
+                const target = startOfWeek(d);
+                const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
+                setWeekOffset(Math.round(diffDays / 7));
+                const newSelected = ((d.getDay() + 6) % 7);
+                setSelectedDay(newSelected);
+                setPickerOpen(false);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+        <button onClick={openCreate} className="p-2 rounded-full bg-primary text-primary-foreground">
           <Plus className="w-5 h-5" />
         </button>
       </div>
@@ -199,7 +248,7 @@ export function DetailedScheduleScreen({ onBack }: { onBack: () => void }) {
             <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
           ) : todayEvents.length === 0 ? (
             <GlassCard className="p-8 text-center">
-              <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+              <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
               <p className="text-sm text-muted-foreground">No events scheduled</p>
               <Button onClick={openCreate} className="mt-3 bg-primary text-primary-foreground">
                 <Plus className="w-4 h-4 mr-1" /> Add event

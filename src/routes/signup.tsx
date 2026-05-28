@@ -120,7 +120,7 @@ function SignupPage() {
                 <Input id="password" type="password" required autoComplete="new-password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 h-11" placeholder="At least 6 characters" />
               </div>
             </div>
-            <Button type="submit" disabled={submitting} className="w-full h-11 bg-gradient-to-r from-[#FF7E9D] to-[#7AB8E0] text-white hover:opacity-90">
+            <Button type="submit" disabled={submitting} className="w-full h-11 bg-primary text-primary-foreground hover:opacity-90">
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
             </Button>
           </form>

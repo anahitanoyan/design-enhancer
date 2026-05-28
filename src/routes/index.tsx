@@ -49,7 +49,7 @@ function Index() {
             <Button variant="ghost">Log in</Button>
           </Link>
           <Link to="/signup">
-            <Button className="bg-gradient-to-r from-[#FF7E9D] to-[#7AB8E0] text-white hover:opacity-90">
+            <Button className="bg-primary text-primary-foreground hover:opacity-90">
               Get started
             </Button>
           </Link>
@@ -78,7 +78,7 @@ function Index() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link to="/signup">
-                <Button size="lg" className="bg-gradient-to-r from-[#FF9B7A] via-[#FF7E9D] to-[#7AB8E0] text-white hover:opacity-90 h-12 px-8 text-base">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:opacity-90 h-12 px-8 text-base">
                   Start free <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
@@ -106,7 +106,7 @@ function Index() {
                 transition={{ duration: 0.4, delay: i * 0.05 }}
                 className="glass-card p-6"
               >
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF9B7A] to-[#7AB8E0] flex items-center justify-center mb-4">
+                <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center mb-4">
                   <f.icon className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold mb-1">{f.title}</h3>

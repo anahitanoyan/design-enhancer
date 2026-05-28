@@ -74,7 +74,7 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
       {/* User Info */}
       <div className="pt-6 border-t border-border space-y-2">
         <div className="flex items-center gap-3 p-3 rounded-xl bg-white/30">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF7E9D] to-[#7AB8E0] flex items-center justify-center text-white font-semibold">
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
