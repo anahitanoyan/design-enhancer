@@ -216,10 +216,6 @@ export function EnhancedWebDashboard() {
                     toast.success("Applied — task created", { action: { label: "View", onClick: () => navigate({ to: "/tasks" }) } });
                     return;
                   }
-                  if (s.type === "schedule") {
-                    toast.success("Conflict resolved", { action: { label: "View", onClick: () => navigate({ to: "/schedule" }) } });
-                    return;
-                  }
                   toast.success(`Applied: ${s.title}`);
                 }}
                 onDismiss={(id) => setSuggestions(s => s.filter(item => item.id !== id))}
