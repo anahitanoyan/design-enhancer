@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell, Calendar, CheckSquare, ShoppingCart, Users, Sparkles } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { AICommandBar } from "@/components/oikos/AICommandBar";
 import { CalendarCard } from "@/components/oikos/CalendarCard";
@@ -20,6 +20,7 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
   const [todayEvents, setTodayEvents] = useState<Array<{ id: string; title: string; time: string; attendees: string[] }>>([]);
   const [familyMembers, setFamilyMembers] = useState<Array<{ id: string; name: string; role: string; status: "active" | "away" }>>([]);
   const [unread, setUnread] = useState(0);
+  const [openTasks, setOpenTasks] = useState(0);
 
   const greeting = useMemo(() => {
     const h = new Date().getHours();
@@ -70,6 +71,11 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
       .select("id", { count: "exact", head: true })
       .eq("read", false)
       .then(({ count }: any) => setUnread(count ?? 0));
+
+    (supabase.from("tasks") as any)
+      .select("id", { count: "exact", head: true })
+      .eq("completed", false)
+      .then(({ count }: any) => setOpenTasks(count ?? 0));
   }, [user?.id]);
 
   const [suggestions, setSuggestions] = useState([
@@ -149,30 +155,64 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
   };
 
   return (
-    <div className="min-h-screen p-4 pb-24">
-      <div className="max-w-md mx-auto space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl mb-1">{greeting}{firstName ? `, ${firstName}` : ""}</h1>
-            <p className="text-sm text-muted-foreground">{todayLabel}</p>
+    <div className="min-h-screen pb-24">
+      {/* Hero header with gradient */}
+      <div className="relative overflow-hidden px-4 pt-6 pb-8">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/20 via-accent/10 to-transparent" />
+        <div className="max-w-md mx-auto">
+          <div className="flex items-start justify-between mb-5">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">{todayLabel}</p>
+              <h1 className="text-3xl font-semibold leading-tight">
+                {greeting}
+                {firstName ? <span className="text-primary">, {firstName}</span> : ""}
+              </h1>
+            </div>
+            <button
+              onClick={() => onNavigate('notifications')}
+              className="relative h-10 w-10 rounded-full bg-card/60 backdrop-blur flex items-center justify-center border border-border/40"
+              aria-label={t("notifications")}
+            >
+              <Bell className="w-5 h-5 text-foreground" />
+              {unread > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-alert rounded-full text-[10px] text-white flex items-center justify-center">
+                  {unread}
+                </span>
+              )}
+            </button>
           </div>
-          <button onClick={() => onNavigate('notifications')} className="relative" aria-label={t("notifications")}>
-            <Bell className="w-6 h-6 text-foreground" />
-            {unread > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-alert rounded-full text-[10px] text-white flex items-center justify-center">
-                {unread}
-              </span>
-            )}
-          </button>
+
+          {/* Live stat tiles */}
+          <div className="grid grid-cols-4 gap-2 mb-5">
+            {[
+              { icon: Calendar, label: "Today", value: todayEvents.length, tone: "from-primary/30 to-primary/5" },
+              { icon: CheckSquare, label: "Open", value: openTasks, tone: "from-accent/30 to-accent/5" },
+              { icon: ShoppingCart, label: "Cart", value: groceryItems.filter(g => !g.checked).length, tone: "from-success/30 to-success/5" },
+              { icon: Users, label: "Family", value: familyMembers.length, tone: "from-warning/30 to-warning/5" },
+            ].map(({ icon: Icon, label, value, tone }) => (
+              <button
+                key={label}
+                className={`rounded-2xl p-3 bg-gradient-to-br ${tone} border border-border/40 backdrop-blur flex flex-col items-start gap-1 transition hover:scale-[1.02]`}
+              >
+                <Icon className="w-4 h-4 text-foreground/70" />
+                <span className="text-xl font-semibold leading-none">{value}</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* AI Command Bar */}
+          <AICommandBar onSubmit={handleAICommand} placeholder="Ask Oikos to plan, schedule, or organize…" />
         </div>
+      </div>
 
-        {/* AI Command Bar */}
-        <AICommandBar onSubmit={handleAICommand} placeholder="What would you like me to do today?" />
-
-        {/* AI Agent Status - Compact View */}
+      <div className="max-w-md mx-auto px-4 space-y-4">
+        {/* AI Agent Status */}
         <GlassCard className="p-4">
-          <h3 className="text-sm mb-3">AI Agents Active</h3>
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <h3 className="text-sm">AI Agents Active</h3>
+          </div>
           <AIAgentPanel activities={agentActivities} compact />
         </GlassCard>
 
