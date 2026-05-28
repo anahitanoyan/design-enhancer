@@ -1,4 +1,4 @@
-import mascotUrl from "@/assets/oikos-mascot.png";
+import logoUrl from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -12,8 +12,8 @@ export function Logo({ size = 40, showWordmark = true, className, tagline }: Log
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <img
-        src={mascotUrl}
-        alt="Oik-Os mascot"
+        src={logoUrl}
+        alt="Oik-Os logo"
         width={size}
         height={size}
         className="drop-shadow-sm"
