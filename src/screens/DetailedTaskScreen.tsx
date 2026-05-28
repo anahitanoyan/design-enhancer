@@ -160,7 +160,7 @@ export function DetailedTaskScreen({ onBack }: { onBack: () => void }) {
         <button onClick={onBack}>
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <CheckSquare className="w-6 h-6 text-secondary" />
+        <CheckSquare className="w-6 h-6 text-primary" />
         <h2>Tasks</h2>
         <button onClick={() => setOpen(true)} className="ml-auto p-2 rounded-full bg-primary text-primary-foreground">
           <Plus className="w-5 h-5" />
