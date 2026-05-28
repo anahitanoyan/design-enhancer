@@ -37,13 +37,13 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
   ];
 
   return (
-    <div className="glass-card h-screen w-64 p-6 flex flex-col rounded-none border-r border-border">
-      <div className="mb-8">
+    <div className="glass-card h-screen w-64 p-6 flex flex-col rounded-none border-r border-border overflow-hidden">
+      <div className="mb-6 shrink-0">
         <Logo tagline="AI Household OS" />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-2">
+      <nav className="flex-1 space-y-2 overflow-y-auto pr-1 -mr-1 min-h-0">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentScreen === item.id;
@@ -72,7 +72,7 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
       </nav>
 
       {/* User Info */}
-      <div className="pt-6 border-t border-border space-y-2">
+      <div className="pt-4 mt-4 border-t border-border space-y-2 shrink-0">
         <div className="flex items-center gap-3 p-3 rounded-xl bg-white/30">
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
             {initials}
