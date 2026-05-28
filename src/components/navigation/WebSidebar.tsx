@@ -1,6 +1,7 @@
-import { Home, Sparkles, Calendar, CheckSquare, ShoppingCart, Bell, Users, TrendingUp, User, LogOut } from "lucide-react";
+import { Home, Calendar, CheckSquare, ShoppingCart, Bell, Users, TrendingUp, User, LogOut } from "lucide-react";
 import { motion } from "motion/react";
 import { Logo } from "@/components/brand/Logo";
+import mascotUrl from "@/assets/oikos-mascot.png";
 import { useAuth, getUserInitials } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -21,9 +22,9 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
     else toast.success("Signed out");
   };
 
-  const navItems = [
+  const navItems: Array<{ id: string; label: string; icon: typeof Home | null; color: string; mascot?: boolean }> = [
     { id: "home", label: "Dashboard", icon: Home, color: "text-primary" },
-    { id: "ai", label: "AI Assistant", icon: Sparkles, color: "text-accent" },
+    { id: "ai", label: "AI Assistant", icon: null, color: "text-accent", mascot: true },
     { id: "schedule", label: "Schedule", icon: Calendar, color: "text-primary" },
     { id: "tasks", label: "Tasks", icon: CheckSquare, color: "text-secondary" },
     { id: "grocery", label: "Grocery", icon: ShoppingCart, color: "text-primary" },
@@ -57,7 +58,11 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
                   : 'hover:bg-white/30 text-foreground'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? '' : item.color}`} />
+              {item.mascot ? (
+                <img src={mascotUrl} alt="" className="w-6 h-6 drop-shadow-sm" />
+              ) : (
+                Icon && <Icon className={`w-5 h-5 ${isActive ? '' : item.color}`} />
+              )}
               <span className="font-medium">{item.label}</span>
             </motion.button>
           );

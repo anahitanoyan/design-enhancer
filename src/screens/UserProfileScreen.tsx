@@ -1,4 +1,4 @@
-import { ArrowLeft, User, Bell, Lock, Palette, Globe, HelpCircle, LogOut, ChevronRight, Shield, CreditCard, Users, Sparkles, TrendingUp, Plus, Loader2 } from "lucide-react";
+import { ArrowLeft, User, Bell, Lock, Palette, Globe, HelpCircle, LogOut, ChevronRight, Shield, CreditCard, Users, Sparkles, TrendingUp, Plus, Loader2, Phone } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
@@ -6,26 +6,54 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth, getUserInitials } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; onNavigate?: (screen: string) => void }) {
   const { user } = useAuth();
   const defaultName = (user?.user_metadata?.display_name as string) || user?.email?.split("@")[0] || "Member";
   const [name, setName] = useState(defaultName);
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
+  const [role, setRole] = useState("Admin");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const initials = getUserInitials(name, user?.email);
   const memberSince = user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : "—";
 
+  useEffect(() => {
+    if (!user?.id) return;
+    (supabase.from("profiles") as any)
+      .select("display_name, phone, bio, role")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }: any) => {
+        if (!data) return;
+        if (data.display_name) setName(data.display_name);
+        setPhone(data.phone ?? "");
+        setBio(data.bio ?? "");
+        setRole(data.role ?? "Admin");
+      });
+  }, [user?.id]);
+
   const handleSave = async () => {
     setSaving(true);
     const { error } = await supabase.auth.updateUser({ data: { display_name: name } });
+    if (error) {
+      setSaving(false);
+      toast.error(error.message);
+      return;
+    }
+    const { error: pErr } = await (supabase.from("profiles") as any)
+      .update({ display_name: name, phone, bio, role })
+      .eq("id", user?.id ?? "");
     setSaving(false);
-    if (error) toast.error(error.message);
+    if (pErr) toast.error(pErr.message);
     else {
-      await supabase.from("profiles").update({ display_name: name }).eq("id", user?.id ?? "");
       toast.success("Profile updated");
       setEditing(false);
     }
@@ -59,14 +87,35 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
             </Avatar>
             <div className="flex-1">
               {editing ? (
-                <Input value={name} onChange={(e) => setName(e.target.value)} className="mb-2" />
+                <div className="space-y-2">
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" />
+                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" />
+                  <Select value={role} onValueChange={setRole}>
+                    <SelectTrigger><SelectValue placeholder="Role" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                      <SelectItem value="Member">Member</SelectItem>
+                      <SelectItem value="Child">Child</SelectItem>
+                      <SelectItem value="Guest">Guest</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Short bio" rows={2} />
+                </div>
               ) : (
-                <h3 className="text-xl mb-1">{name}</h3>
+                <>
+                  <h3 className="text-xl mb-1">{name}</h3>
+                  {phone && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+                      <Phone className="w-3 h-3" /> {phone}
+                    </p>
+                  )}
+                  {bio && <p className="text-xs text-muted-foreground mb-1">{bio}</p>}
+                </>
               )}
               <p className="text-sm text-muted-foreground mb-1">{user?.email}</p>
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
-                  Admin
+                  {role}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   Member since {memberSince}

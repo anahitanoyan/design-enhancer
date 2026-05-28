@@ -1,6 +1,7 @@
-import { Sparkles, Bot, Calendar, CheckSquare, ShoppingCart, MessageCircle } from "lucide-react";
+import { X, Calendar, CheckSquare, ShoppingCart, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
+import mascotUrl from "@/assets/oikos-mascot.png";
 
 interface FloatingAIButtonProps {
   onAction: (action: string) => void;
@@ -61,9 +62,9 @@ export function FloatingAIButton({ onAction }: FloatingAIButtonProps) {
           transition={{ duration: 0.3 }}
         >
           {isOpen ? (
-            <Bot className="w-7 h-7 text-white" />
+            <X className="w-7 h-7 text-white" />
           ) : (
-            <Sparkles className="w-7 h-7 text-white" />
+            <img src={mascotUrl} alt="Oik-Os" className="w-10 h-10 drop-shadow-md" />
           )}
         </motion.div>
 
