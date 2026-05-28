@@ -20,6 +20,7 @@ import { Route as AppTasksRouteImport } from './routes/_app.tasks'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppScheduleRouteImport } from './routes/_app.schedule'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
+import { Route as AppHelpRouteImport } from './routes/_app.help'
 import { Route as AppGroceryRouteImport } from './routes/_app.grocery'
 import { Route as AppFamilyRouteImport } from './routes/_app.family'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -81,6 +82,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
+const AppHelpRoute = AppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppGroceryRoute = AppGroceryRouteImport.update({
   id: '/grocery',
   path: '/grocery',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/family': typeof AppFamilyRoute
   '/grocery': typeof AppGroceryRoute
+  '/help': typeof AppHelpRoute
   '/notifications': typeof AppNotificationsRoute
   '/schedule': typeof AppScheduleRoute
   '/settings': typeof AppSettingsRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/family': typeof AppFamilyRoute
   '/grocery': typeof AppGroceryRoute
+  '/help': typeof AppHelpRoute
   '/notifications': typeof AppNotificationsRoute
   '/schedule': typeof AppScheduleRoute
   '/settings': typeof AppSettingsRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/family': typeof AppFamilyRoute
   '/_app/grocery': typeof AppGroceryRoute
+  '/_app/help': typeof AppHelpRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/schedule': typeof AppScheduleRoute
   '/_app/settings': typeof AppSettingsRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/family'
     | '/grocery'
+    | '/help'
     | '/notifications'
     | '/schedule'
     | '/settings'
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/family'
     | '/grocery'
+    | '/help'
     | '/notifications'
     | '/schedule'
     | '/settings'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/family'
     | '/_app/grocery'
+    | '/_app/help'
     | '/_app/notifications'
     | '/_app/schedule'
     | '/_app/settings'
@@ -315,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/help': {
+      id: '/_app/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof AppHelpRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/grocery': {
       id: '/_app/grocery'
       path: '/grocery'
@@ -367,6 +386,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppFamilyRoute: typeof AppFamilyRoute
   AppGroceryRoute: typeof AppGroceryRoute
+  AppHelpRoute: typeof AppHelpRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppScheduleRoute: typeof AppScheduleRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -380,6 +400,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppFamilyRoute: AppFamilyRoute,
   AppGroceryRoute: AppGroceryRoute,
+  AppHelpRoute: AppHelpRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppScheduleRoute: AppScheduleRoute,
   AppSettingsRoute: AppSettingsRoute,
