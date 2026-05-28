@@ -27,6 +27,17 @@ export function AIChat({ onBack, context }: { onBack: () => void; context?: stri
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, status]);
 
+  // Auto-send a pending prompt handed off from the dashboard command bar.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const pending = sessionStorage.getItem("oikos_pending_ai_prompt");
+    if (pending && pending.trim()) {
+      sessionStorage.removeItem("oikos_pending_ai_prompt");
+      sendMessage({ text: pending.trim() });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const submit = async (text: string) => {
     if (!text.trim() || isLoading) return;
     setInput("");

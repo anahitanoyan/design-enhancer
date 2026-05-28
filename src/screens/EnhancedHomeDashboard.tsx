@@ -129,7 +129,9 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
   ];
 
   const handleAICommand = (command: string) => {
-    console.log("AI Command:", command);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("oikos_pending_ai_prompt", command);
+    }
     onNavigate("ai");
   };
 
