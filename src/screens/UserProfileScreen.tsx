@@ -482,6 +482,85 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
           <p>© 2026 OikOS. All rights reserved.</p>
         </div>
       </div>
+
+      {/* Privacy & Security */}
+      <Dialog open={privacyOpen} onOpenChange={setPrivacyOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Privacy & Security</DialogTitle>
+            <DialogDescription>Manage how OikOS protects your household data.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <button onClick={() => { setPrivacyOpen(false); setPwOpen(true); }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/40 hover:bg-white/60 transition">
+              <Key className="w-4 h-4 text-primary" />
+              <div className="text-left flex-1">
+                <div className="text-sm font-medium">Change password</div>
+                <div className="text-xs text-muted-foreground">Update the password used to sign in.</div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white/40">
+              <div className="flex items-center gap-3">
+                <Eye className="w-4 h-4 text-primary" />
+                <div>
+                  <div className="text-sm font-medium">Two-factor authentication</div>
+                  <div className="text-xs text-muted-foreground">Add an extra layer of security.</div>
+                </div>
+              </div>
+              <Switch />
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white/40">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <div>
+                  <div className="text-sm font-medium">Allow AI to learn from my data</div>
+                  <div className="text-xs text-muted-foreground">Personalize suggestions over time.</div>
+                </div>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <button
+              onClick={async () => {
+                if (!confirm("Permanently sign out of all devices?")) return;
+                await supabase.auth.signOut({ scope: "global" });
+                toast.success("Signed out everywhere");
+                setPrivacyOpen(false);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-xl bg-alert/10 hover:bg-alert/20 text-alert transition"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="text-sm font-medium">Sign out of all devices</span>
+            </button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPrivacyOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={pwOpen} onOpenChange={setPwOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Change password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="pw-new">New password</Label>
+              <Input id="pw-new" type="password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="pw-confirm">Confirm password</Label>
+              <Input id="pw-confirm" type="password" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPwOpen(false)}>Cancel</Button>
+            <Button onClick={handleChangePassword} disabled={pwSaving} className="bg-primary text-primary-foreground">
+              {pwSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update password"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
