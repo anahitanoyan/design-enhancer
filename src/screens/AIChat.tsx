@@ -1,9 +1,10 @@
-import { ArrowLeft, Send, User, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, User, Loader2, CheckCircle2, AlertCircle, Wrench } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import mascotUrl from "@/assets/oikos-mascot.png";
 
 const SUGGESTIONS = [
@@ -14,7 +15,17 @@ const SUGGESTIONS = [
 ];
 
 export function AIChat({ onBack, context }: { onBack: () => void; context?: string }) {
-  const transport = useRef(new DefaultChatTransport({ api: "/api/chat", body: { context } })).current;
+  const transport = useRef(
+    new DefaultChatTransport({
+      api: "/api/chat",
+      body: { context },
+      headers: async () => {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      },
+    })
+  ).current;
   const { messages, sendMessage, status, error } = useChat({
     transport,
     onError: (e) => toast.error(e.message || "Oik-Os couldn't reply. Try again."),
