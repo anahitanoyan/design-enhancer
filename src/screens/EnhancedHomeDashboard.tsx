@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { usePrefs } from "@/lib/i18n";
+import { toast } from "sonner";
 
 export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const { user } = useAuth();
@@ -142,9 +143,30 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
     await (supabase.from("grocery_items") as any).update({ checked: !item.checked }).eq("id", id);
   };
 
-  const handleAcceptSuggestion = (id: string) => {
-    setSuggestions(suggestions.filter(s => s.id !== id));
-    console.log("Accepted suggestion:", id);
+  const handleAcceptSuggestion = async (id: string) => {
+    const s = suggestions.find((x) => x.id === id);
+    if (!s) return;
+    setSuggestions((arr) => arr.filter((x) => x.id !== id));
+    if (s.type === "task" && user?.id) {
+      const { error } = await (supabase.from("tasks") as any).insert({
+        owner_id: user.id,
+        title: "AI: Rebalance household tasks",
+        priority: "medium",
+        description: s.description,
+      });
+      if (error) return toast.error("Could not apply: " + error.message);
+      const { count } = await (supabase.from("tasks") as any)
+        .select("id", { count: "exact", head: true }).eq("completed", false);
+      setOpenTasks(count ?? 0);
+      toast.success("Applied — new task created", { action: { label: "View", onClick: () => onNavigate("tasks") } });
+      return;
+    }
+    if (s.type === "schedule") {
+      toast.success("Conflict resolved — opening Schedule", { action: { label: "View", onClick: () => onNavigate("schedule") } });
+      onNavigate("schedule");
+      return;
+    }
+    toast.success(`Applied: ${s.title}`);
   };
 
   const handleDismissSuggestion = (id: string) => {
