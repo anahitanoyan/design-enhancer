@@ -10,6 +10,8 @@ const screenToPath: Record<string, string> = {
   analytics: "/analytics",
   family: "/family",
   settings: "/settings",
+  billing: "/billing",
+  help: "/help",
 };
 
 const pathToScreen: Record<string, string> = Object.fromEntries(

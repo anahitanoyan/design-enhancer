@@ -20,9 +20,11 @@ import { Route as AppTasksRouteImport } from './routes/_app.tasks'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppScheduleRouteImport } from './routes/_app.schedule'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
+import { Route as AppHelpRouteImport } from './routes/_app.help'
 import { Route as AppGroceryRouteImport } from './routes/_app.grocery'
 import { Route as AppFamilyRouteImport } from './routes/_app.family'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppBillingRouteImport } from './routes/_app.billing'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as AppAiRouteImport } from './routes/_app.ai'
 
@@ -80,6 +82,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
+const AppHelpRoute = AppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppGroceryRoute = AppGroceryRouteImport.update({
   id: '/grocery',
   path: '/grocery',
@@ -93,6 +100,11 @@ const AppFamilyRoute = AppFamilyRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBillingRoute = AppBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
@@ -114,9 +126,11 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/ai': typeof AppAiRoute
   '/analytics': typeof AppAnalyticsRoute
+  '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/family': typeof AppFamilyRoute
   '/grocery': typeof AppGroceryRoute
+  '/help': typeof AppHelpRoute
   '/notifications': typeof AppNotificationsRoute
   '/schedule': typeof AppScheduleRoute
   '/settings': typeof AppSettingsRoute
@@ -131,9 +145,11 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/ai': typeof AppAiRoute
   '/analytics': typeof AppAnalyticsRoute
+  '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/family': typeof AppFamilyRoute
   '/grocery': typeof AppGroceryRoute
+  '/help': typeof AppHelpRoute
   '/notifications': typeof AppNotificationsRoute
   '/schedule': typeof AppScheduleRoute
   '/settings': typeof AppSettingsRoute
@@ -150,9 +166,11 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_app/ai': typeof AppAiRoute
   '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/billing': typeof AppBillingRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/family': typeof AppFamilyRoute
   '/_app/grocery': typeof AppGroceryRoute
+  '/_app/help': typeof AppHelpRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/schedule': typeof AppScheduleRoute
   '/_app/settings': typeof AppSettingsRoute
@@ -169,9 +187,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/ai'
     | '/analytics'
+    | '/billing'
     | '/dashboard'
     | '/family'
     | '/grocery'
+    | '/help'
     | '/notifications'
     | '/schedule'
     | '/settings'
@@ -186,9 +206,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/ai'
     | '/analytics'
+    | '/billing'
     | '/dashboard'
     | '/family'
     | '/grocery'
+    | '/help'
     | '/notifications'
     | '/schedule'
     | '/settings'
@@ -204,9 +226,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_app/ai'
     | '/_app/analytics'
+    | '/_app/billing'
     | '/_app/dashboard'
     | '/_app/family'
     | '/_app/grocery'
+    | '/_app/help'
     | '/_app/notifications'
     | '/_app/schedule'
     | '/_app/settings'
@@ -303,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/help': {
+      id: '/_app/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof AppHelpRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/grocery': {
       id: '/_app/grocery'
       path: '/grocery'
@@ -322,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/billing': {
+      id: '/_app/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AppBillingRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/analytics': {
@@ -344,9 +382,11 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAiRoute: typeof AppAiRoute
   AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppBillingRoute: typeof AppBillingRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppFamilyRoute: typeof AppFamilyRoute
   AppGroceryRoute: typeof AppGroceryRoute
+  AppHelpRoute: typeof AppHelpRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppScheduleRoute: typeof AppScheduleRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -356,9 +396,11 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAiRoute: AppAiRoute,
   AppAnalyticsRoute: AppAnalyticsRoute,
+  AppBillingRoute: AppBillingRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppFamilyRoute: AppFamilyRoute,
   AppGroceryRoute: AppGroceryRoute,
+  AppHelpRoute: AppHelpRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppScheduleRoute: AppScheduleRoute,
   AppSettingsRoute: AppSettingsRoute,
