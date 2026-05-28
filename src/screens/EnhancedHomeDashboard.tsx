@@ -115,19 +115,6 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
     }
   ];
 
-  const todayEvents = [
-    { id: "1", title: "Team Meeting", time: "9:00 AM", attendees: ["John", "Sarah"] },
-    { id: "2", title: "Lunch with Family", time: "12:30 PM", attendees: ["Mom", "Dad", "Sister"] },
-    { id: "3", title: "Soccer Practice", time: "4:00 PM", attendees: ["Coach", "Team"] }
-  ];
-
-  const familyMembers = [
-    { id: "1", name: "John Doe", role: "Parent", status: "active" as const },
-    { id: "2", name: "Jane Doe", role: "Parent", status: "active" as const },
-    { id: "3", name: "Sarah Doe", role: "Child", status: "away" as const },
-    { id: "4", name: "Mike Doe", role: "Child", status: "active" as const }
-  ];
-
   const handleAICommand = (command: string) => {
     console.log("AI Command:", command);
     onNavigate("ai");
