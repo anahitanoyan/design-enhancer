@@ -173,8 +173,8 @@ export function DetailedScheduleScreen({ onBack }: { onBack: () => void }) {
             <Calendar
               mode="single"
               captionLayout="dropdown"
-              fromYear={1970}
-              toYear={2100}
+              startMonth={new Date(1970, 0)}
+              endMonth={new Date(2100, 11)}
               defaultMonth={weekDates[selectedDay] ?? new Date()}
               modifiers={{
                 hasEvents: (d) => (eventCounts[d.toDateString()] ?? 0) > 0,
