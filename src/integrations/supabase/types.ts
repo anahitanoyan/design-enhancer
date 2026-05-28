@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      events: {
+        Row: {
+          attendees: string[]
+          color: string
+          created_at: string
+          description: string | null
+          ends_at: string
+          event_type: string
+          id: string
+          location: string | null
+          owner_id: string
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          attendees?: string[]
+          color?: string
+          created_at?: string
+          description?: string | null
+          ends_at: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          owner_id: string
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          attendees?: string[]
+          color?: string
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          owner_id?: string
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       family_members: {
         Row: {
           avatar_initials: string | null
