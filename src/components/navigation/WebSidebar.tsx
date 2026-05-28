@@ -1,5 +1,9 @@
-import { Home, Sparkles, Calendar, CheckSquare, ShoppingCart, Bell, Users, TrendingUp, User, Settings } from "lucide-react";
+import { Home, Sparkles, Calendar, CheckSquare, ShoppingCart, Bell, Users, TrendingUp, User, LogOut } from "lucide-react";
 import { motion } from "motion/react";
+import { Logo } from "@/components/brand/Logo";
+import { useAuth, getUserInitials } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface WebSidebarProps {
   currentScreen: string;
@@ -7,6 +11,16 @@ interface WebSidebarProps {
 }
 
 export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
+  const { user } = useAuth();
+  const name = (user?.user_metadata?.display_name as string) || user?.email?.split("@")[0] || "Member";
+  const initials = getUserInitials(name, user?.email);
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) toast.error(error.message);
+    else toast.success("Signed out");
+  };
+
   const navItems = [
     { id: "home", label: "Dashboard", icon: Home, color: "text-primary" },
     { id: "ai", label: "AI Assistant", icon: Sparkles, color: "text-accent" },
@@ -21,17 +35,8 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
 
   return (
     <div className="glass-card h-screen w-64 p-6 flex flex-col rounded-none border-r border-border">
-      {/* Logo */}
       <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-secondary flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold">OikOS</h1>
-            <p className="text-xs text-muted-foreground">AI Household OS</p>
-          </div>
-        </div>
+        <Logo tagline="AI Household OS" />
       </div>
 
       {/* Navigation */}
@@ -60,16 +65,22 @@ export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
       </nav>
 
       {/* User Info */}
-      <div className="pt-6 border-t border-border">
+      <div className="pt-6 border-t border-border space-y-2">
         <div className="flex items-center gap-3 p-3 rounded-xl bg-white/30">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-semibold">
-            JD
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF7E9D] to-[#7AB8E0] flex items-center justify-center text-white font-semibold">
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">John Doe</div>
-            <div className="text-xs text-muted-foreground">Admin</div>
+            <div className="text-sm font-medium truncate">{name}</div>
+            <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
           </div>
         </div>
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-alert/10 hover:text-alert transition"
+        >
+          <LogOut className="w-4 h-4" /> Sign out
+        </button>
       </div>
     </div>
   );

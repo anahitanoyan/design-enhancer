@@ -7,8 +7,13 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Toaster } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
+import logoUrl from "../assets/logo.png";
 
 function NotFoundComponent() {
   return (
@@ -72,25 +77,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Design Enhancer transforms Figma designs into functional web pages, generating necessary sections." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Design Enhancer transforms Figma designs into functional web pages, generating necessary sections." },
+      { title: "OikOS — AI Household Operating System" },
+      { name: "description", content: "OikOS is an AI-powered household command center for schedule, tasks, grocery, family and notifications — beautifully designed for desktop and mobile." },
+      { name: "author", content: "OikOS" },
+      { property: "og:title", content: "OikOS — AI Household Operating System" },
+      { property: "og:description", content: "Your AI-powered household command center." },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: logoUrl },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Design Enhancer transforms Figma designs into functional web pages, generating necessary sections." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/28c6beb6-12f0-4404-a79f-ea077c8001cf/id-preview-a1728748--72521c14-86b0-4174-8e77-5843953dfba0.lovable.app-1779994462707.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/28c6beb6-12f0-4404-a79f-ea077c8001cf/id-preview-a1728748--72521c14-86b0-4174-8e77-5843953dfba0.lovable.app-1779994462707.png" },
+      { name: "twitter:title", content: "OikOS — AI Household Operating System" },
+      { name: "twitter:description", content: "Your AI-powered household command center." },
+      { name: "twitter:image", content: logoUrl },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/png", href: logoUrl },
+      { rel: "apple-touch-icon", href: logoUrl },
     ],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "OikOS",
+        applicationCategory: "LifestyleApplication",
+        operatingSystem: "Web",
+        description: "AI-powered household command center for schedule, tasks, grocery, family and notifications.",
+      }),
+    }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -117,8 +134,23 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthListener />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
   );
+}
+
+function AuthListener() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      router.invalidate();
+      queryClient.invalidateQueries();
+    });
+    return () => subscription.unsubscribe();
+  }, [router, queryClient]);
+  return null;
 }
