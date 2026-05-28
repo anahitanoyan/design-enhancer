@@ -213,60 +213,130 @@ export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: str
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 space-y-4">
-        {/* AI Agent Status */}
-        <GlassCard className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <h3 className="text-sm">AI Agents Active</h3>
+      <div className="max-w-md mx-auto px-4">
+        {/* Bento grid — denser, side-by-side cards */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Today's Schedule — spans full width */}
+          <GlassCard className="col-span-2 p-4">
+            <button onClick={() => onNavigate('schedule')} className="w-full text-left">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  <h3 className="text-sm font-medium">Today's Schedule</h3>
+                </div>
+                <span className="text-xs text-muted-foreground">{todayEvents.length} events</span>
+              </div>
+              {todayEvents.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-3">No events today — tap to plan your day.</p>
+              ) : (
+                <div className="space-y-2">
+                  {todayEvents.slice(0, 3).map((e) => (
+                    <div key={e.id} className="flex items-center gap-3 p-2 rounded-lg bg-card/40">
+                      <div className="w-1 h-8 bg-primary rounded-full" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">{e.title}</p>
+                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" />{e.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </button>
+          </GlassCard>
+
+          {/* Tasks */}
+          <GlassCard className="p-4">
+            <button onClick={() => onNavigate('tasks')} className="w-full text-left h-full flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckSquare className="w-4 h-4 text-accent" />
+                <h3 className="text-sm font-medium">Tasks</h3>
+              </div>
+              <p className="text-2xl font-semibold mb-2">{openTasks}</p>
+              <div className="space-y-1 flex-1">
+                {taskPreview.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground">All done 🎉</p>
+                ) : taskPreview.map((t) => (
+                  <div key={t.id} className="flex items-center gap-1.5">
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      t.priority === 'high' ? 'bg-alert' : t.priority === 'medium' ? 'bg-warning' : 'bg-success'
+                    }`} />
+                    <span className="text-[11px] truncate">{t.title}</span>
+                  </div>
+                ))}
+              </div>
+            </button>
+          </GlassCard>
+
+          {/* Grocery */}
+          <GlassCard className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4 text-success" />
+                <h3 className="text-sm font-medium">Grocery</h3>
+              </div>
+              <button onClick={() => onNavigate('grocery')} className="text-[10px] text-primary">View</button>
+            </div>
+            <p className="text-2xl font-semibold mb-2">{groceryItems.filter(g => !g.checked).length}</p>
+            <div className="space-y-1.5">
+              {groceryItems.slice(0, 3).map((g) => (
+                <label key={g.id} className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox checked={g.checked} onCheckedChange={() => toggleGroceryItem(g.id)} />
+                  <span className={`text-[11px] truncate ${g.checked ? 'line-through text-muted-foreground' : ''}`}>
+                    {g.name}
+                  </span>
+                </label>
+              ))}
+              {groceryItems.length === 0 && <p className="text-[10px] text-muted-foreground">List empty</p>}
+            </div>
+          </GlassCard>
+
+          {/* AI Insights — full width */}
+          <div className="col-span-2">
+            <AIInsightCard
+              insight={{
+                type: "analysis",
+                title: "Weekly Analysis",
+                description: "Your household has been optimized this week.",
+                metrics: [
+                  { label: "Conflicts", value: "2", status: "warning" },
+                  { label: "Optimized", value: "5", status: "success" },
+                  { label: "Saved", value: "3h", status: "info" }
+                ],
+                actions: [{ label: "View Details", onClick: () => onNavigate("ai") }]
+              }}
+            />
           </div>
-          <AIAgentPanel activities={agentActivities} compact />
-        </GlassCard>
 
-        {/* AI Insights */}
-        <AIInsightCard
-          insight={{
-            type: "analysis",
-            title: "Weekly Analysis Complete",
-            description: "I've analyzed your household's week and found optimization opportunities",
-            metrics: [
-              { label: "Conflicts", value: "2", status: "warning" },
-              { label: "Optimizations", value: "5", status: "success" },
-              { label: "Savings", value: "3 hours", status: "info" }
-            ],
-            actions: [
-              { label: "View Details", onClick: () => onNavigate("ai") }
-            ]
-          }}
-        />
-
-        {/* AI Suggestions */}
-        {suggestions.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-sm text-muted-foreground px-1">AI Recommendations</h3>
-            {suggestions.map(suggestion => (
-              <AISuggestionCard
-                key={suggestion.id}
-                suggestion={suggestion}
-                onAccept={handleAcceptSuggestion}
-                onDismiss={handleDismissSuggestion}
-              />
-            ))}
+          {/* Family — full width */}
+          <div className="col-span-2">
+            <FamilyMembersCard members={familyMembers} />
           </div>
-        )}
 
-        {/* Today's Schedule */}
-        <CalendarCard date="Today's Schedule" events={todayEvents.length ? todayEvents : [{ id: "empty", title: "No events today — tap + to plan your day", time: "", attendees: [] }]} />
+          {/* AI Agents */}
+          <GlassCard className="col-span-2 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-medium">AI Agents Active</h3>
+            </div>
+            <AIAgentPanel activities={agentActivities} compact />
+          </GlassCard>
 
-        {/* Grocery List */}
-        <GroceryListCard
-          items={groceryItems}
-          onToggle={toggleGroceryItem}
-          onAdd={() => onNavigate('grocery')}
-        />
-
-        {/* Family Members */}
-        <FamilyMembersCard members={familyMembers} />
+          {/* AI Suggestions */}
+          {suggestions.length > 0 && (
+            <div className="col-span-2 space-y-3">
+              {suggestions.map((s) => (
+                <AISuggestionCard
+                  key={s.id}
+                  suggestion={s}
+                  onAccept={handleAcceptSuggestion}
+                  onDismiss={handleDismissSuggestion}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Floating AI Assistant */}
