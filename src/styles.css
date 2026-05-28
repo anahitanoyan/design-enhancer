@@ -179,4 +179,16 @@
   .soft-shadow {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
   }
+
+  .bg-app-gradient {
+    background: var(--background-gradient);
+    background-attachment: fixed;
+  }
+
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #FF9B7A 0%, #FF7E9D 50%, #7AB8E0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
