@@ -93,7 +93,7 @@ export function DetailedGroceryScreen({ onBack }: { onBack: () => void }) {
           <button className="p-2 rounded-xl bg-white/30 hover:bg-white/50 transition-colors">
             <Share2 className="w-5 h-5" />
           </button>
-          <button className="p-2 rounded-full bg-primary text-primary-foreground">
+          <button onClick={() => setOpen(true)} className="p-2 rounded-full bg-primary text-primary-foreground">
             <Plus className="w-5 h-5" />
           </button>
         </div>
@@ -123,8 +123,8 @@ export function DetailedGroceryScreen({ onBack }: { onBack: () => void }) {
               <div className="text-xs text-muted-foreground">Collected</div>
             </div>
             <div className="text-center">
-              <div className="text-xl font-semibold text-warning mb-1">${totalPrice.toFixed(2)}</div>
-              <div className="text-xs text-muted-foreground">Est. Total</div>
+              <div className="text-xl font-semibold text-warning mb-1">{items.length - items.filter(i => i.checked).length}</div>
+              <div className="text-xs text-muted-foreground">Remaining</div>
             </div>
           </div>
         </GlassCard>
@@ -146,11 +146,11 @@ export function DetailedGroceryScreen({ onBack }: { onBack: () => void }) {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3">
-          <button className="glass-card p-3 flex items-center justify-center gap-2 hover:bg-white/50 transition-colors">
-            <Download className="w-4 h-4 text-primary" />
-            <span className="text-sm">Export List</span>
+          <button onClick={() => setOpen(true)} className="glass-card p-3 flex items-center justify-center gap-2 hover:bg-white/50 transition-colors">
+            <Plus className="w-4 h-4 text-primary" />
+            <span className="text-sm">Add Item</span>
           </button>
-          <button className="glass-card p-3 flex items-center justify-center gap-2 hover:bg-white/50 transition-colors">
+          <button onClick={clearChecked} className="glass-card p-3 flex items-center justify-center gap-2 hover:bg-white/50 transition-colors">
             <Trash2 className="w-4 h-4 text-alert" />
             <span className="text-sm">Clear Checked</span>
           </button>
@@ -193,11 +193,8 @@ export function DetailedGroceryScreen({ onBack }: { onBack: () => void }) {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          {item.aiSuggested && (
+                          {item.ai_suggested && (
                             <Sparkles className="w-3 h-3 text-accent" />
-                          )}
-                          {item.price && (
-                            <span className="text-xs text-muted-foreground">${item.price.toFixed(2)}</span>
                           )}
                           <button
                             onClick={(e) => {
@@ -235,11 +232,8 @@ export function DetailedGroceryScreen({ onBack }: { onBack: () => void }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {item.aiSuggested && (
+                    {item.ai_suggested && (
                       <Sparkles className="w-3 h-3 text-accent" />
-                    )}
-                    {item.price && (
-                      <span className="text-xs">${item.price.toFixed(2)}</span>
                     )}
                     <button
                       onClick={(e) => {
