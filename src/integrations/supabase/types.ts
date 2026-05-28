@@ -14,32 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      family_members: {
+        Row: {
+          avatar_initials: string | null
+          created_at: string
+          email: string | null
+          id: string
+          joined_date: string
+          name: string
+          owner_id: string
+          phone: string | null
+          role: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_initials?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          joined_date?: string
+          name: string
+          owner_id: string
+          phone?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_initials?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          joined_date?: string
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           display_name: string | null
           id: string
           locale: string
           onboarded_at: string | null
+          phone: string | null
+          role: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           id: string
           locale?: string
           onboarded_at?: string | null
+          phone?: string | null
+          role?: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
           locale?: string
           onboarded_at?: string | null
+          phone?: string | null
+          role?: string
           updated_at?: string
         }
         Relationships: []
