@@ -1,48 +1,84 @@
-import { ArrowLeft, Plus, ShoppingCart, Sparkles, Share2, Download, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, ShoppingCart, Sparkles, Share2, Trash2 } from "lucide-react";
 import { GlassCard } from "@/components/oikos/GlassCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/oikos/StatusBadge";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface GroceryItem {
   id: string;
   name: string;
-  quantity?: string;
+  quantity: string | null;
   category: string;
   checked: boolean;
-  aiSuggested: boolean;
-  price?: number;
+  ai_suggested: boolean;
 }
 
+const CATEGORIES = ["Dairy", "Bakery", "Fruits", "Vegetables", "Meat", "Pantry", "Frozen", "Beverages", "Other"];
+
 export function DetailedGroceryScreen({ onBack }: { onBack: () => void }) {
-  const [items, setItems] = useState<GroceryItem[]>([
-    { id: "1", name: "Whole Milk", quantity: "1 gal", category: "Dairy", checked: false, aiSuggested: false, price: 4.99 },
-    { id: "2", name: "Whole Wheat Bread", quantity: "1 loaf", category: "Bakery", checked: true, aiSuggested: false, price: 3.49 },
-    { id: "3", name: "Organic Apples", quantity: "6 ct", category: "Fruits", checked: false, aiSuggested: false, price: 5.99 },
-    { id: "4", name: "Chicken Breast", quantity: "2 lbs", category: "Meat", checked: false, aiSuggested: false, price: 12.99 },
-    { id: "5", name: "Cherry Tomatoes", quantity: "1 pint", category: "Vegetables", checked: false, aiSuggested: true, price: 3.99 },
-    { id: "6", name: "Greek Yogurt", quantity: "32 oz", category: "Dairy", checked: false, aiSuggested: true, price: 6.49 },
-    { id: "7", name: "Olive Oil", quantity: "16 oz", category: "Pantry", checked: false, aiSuggested: false, price: 8.99 },
-    { id: "8", name: "Pasta", quantity: "1 lb", category: "Pantry", checked: false, aiSuggested: true, price: 2.49 },
-    { id: "9", name: "Bananas", quantity: "5 ct", category: "Fruits", checked: false, aiSuggested: false, price: 1.99 },
-    { id: "10", name: "Cheddar Cheese", quantity: "8 oz", category: "Dairy", checked: false, aiSuggested: true, price: 4.99 },
-    { id: "11", name: "Spinach", quantity: "1 bunch", category: "Vegetables", checked: false, aiSuggested: false, price: 2.99 },
-    { id: "12", name: "Rice", quantity: "2 lbs", category: "Pantry", checked: false, aiSuggested: true, price: 4.49 }
-  ]);
+  const { user } = useAuth();
+  const [items, setItems] = useState<GroceryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", quantity: "", category: "Other" });
 
-  const categories = [...new Set(items.map(item => item.category))];
-  const progress = (items.filter(i => i.checked).length / items.length) * 100;
-  const totalPrice = items.reduce((sum, item) => sum + (item.price || 0), 0);
-  const aiSuggestedCount = items.filter(i => i.aiSuggested).length;
+  const load = async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("grocery_items")
+      .select("id,name,quantity,category,checked,ai_suggested")
+      .order("created_at", { ascending: false });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    setItems((data as GroceryItem[]) ?? []);
+  };
+  useEffect(() => { load(); }, [user?.id]);
 
-  const toggleItem = (id: string) => {
-    setItems(items.map(item => item.id === id ? { ...item, checked: !item.checked } : item));
+  const toggleItem = async (id: string) => {
+    const it = items.find((i) => i.id === id); if (!it) return;
+    setItems((arr) => arr.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i)));
+    const { error } = await supabase.from("grocery_items").update({ checked: !it.checked }).eq("id", id);
+    if (error) { toast.error(error.message); load(); }
+  };
+  const deleteItem = async (id: string) => {
+    const { error } = await supabase.from("grocery_items").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    setItems((arr) => arr.filter((i) => i.id !== id));
+  };
+  const clearChecked = async () => {
+    const ids = items.filter((i) => i.checked).map((i) => i.id);
+    if (ids.length === 0) return;
+    const { error } = await supabase.from("grocery_items").delete().in("id", ids);
+    if (error) return toast.error(error.message);
+    toast.success(`Cleared ${ids.length} items`); load();
+  };
+  const addItem = async () => {
+    if (!user?.id || !form.name.trim()) return;
+    const { error } = await supabase.from("grocery_items").insert({
+      owner_id: user.id,
+      name: form.name.trim(),
+      quantity: form.quantity.trim() || null,
+      category: form.category || "Other",
+      checked: false,
+      ai_suggested: false,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Added"); setForm({ name: "", quantity: "", category: form.category }); setOpen(false); load();
   };
 
-  const deleteItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
-  };
+  const categories = useMemo(() => [...new Set(items.map((i) => i.category))], [items]);
+  const progress = items.length === 0 ? 0 : (items.filter((i) => i.checked).length / items.length) * 100;
+  const aiSuggestedCount = items.filter((i) => i.ai_suggested).length;
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FFF5F0] via-[#E8F4F8] to-[#F0F8FF]">
