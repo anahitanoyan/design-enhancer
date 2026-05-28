@@ -56,6 +56,78 @@ export type Database = {
         }
         Relationships: []
       }
+      grocery_items: {
+        Row: {
+          ai_suggested: boolean
+          category: string
+          checked: boolean
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          quantity: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_suggested?: boolean
+          category?: string
+          checked?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          quantity?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_suggested?: boolean
+          category?: string
+          checked?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          quantity?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          owner_id: string
+          read: boolean
+          title: string
+          type: string
+          updated_at: string
+          urgent: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          owner_id: string
+          read?: boolean
+          title: string
+          type?: string
+          updated_at?: string
+          urgent?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          owner_id?: string
+          read?: boolean
+          title?: string
+          type?: string
+          updated_at?: string
+          urgent?: boolean
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -91,6 +163,51 @@ export type Database = {
           onboarded_at?: string | null
           phone?: string | null
           role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          assignee: string | null
+          category: string | null
+          completed: boolean
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          owner_id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee?: string | null
+          category?: string | null
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          owner_id: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee?: string | null
+          category?: string | null
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          owner_id?: string
+          priority?: string
+          status?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
