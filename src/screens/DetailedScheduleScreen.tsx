@@ -85,6 +85,21 @@ export function DetailedScheduleScreen({ onBack }: { onBack: () => void }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadEvents(); }, [user?.id, weekStart.toISOString()]);
 
+  // Load summary of all event dates for calendar dots
+  useEffect(() => {
+    if (!user?.id) return;
+    (supabase.from("events") as any)
+      .select("starts_at")
+      .then(({ data }: any) => {
+        const map: Record<string, number> = {};
+        (data ?? []).forEach((e: any) => {
+          const k = new Date(e.starts_at).toDateString();
+          map[k] = (map[k] ?? 0) + 1;
+        });
+        setEventCounts(map);
+      });
+  }, [user?.id, events.length]);
+
   const getDayEvents = (idx: number) =>
     events.filter(e => new Date(e.starts_at).toDateString() === weekDates[idx].toDateString());
 
