@@ -1,0 +1,76 @@
+import { Home, Sparkles, Calendar, CheckSquare, ShoppingCart, Bell, Users, TrendingUp, User, Settings } from "lucide-react";
+import { motion } from "motion/react";
+
+interface WebSidebarProps {
+  currentScreen: string;
+  onNavigate: (screen: string) => void;
+}
+
+export function WebSidebar({ currentScreen, onNavigate }: WebSidebarProps) {
+  const navItems = [
+    { id: "home", label: "Dashboard", icon: Home, color: "text-primary" },
+    { id: "ai", label: "AI Assistant", icon: Sparkles, color: "text-accent" },
+    { id: "schedule", label: "Schedule", icon: Calendar, color: "text-primary" },
+    { id: "tasks", label: "Tasks", icon: CheckSquare, color: "text-secondary" },
+    { id: "grocery", label: "Grocery", icon: ShoppingCart, color: "text-primary" },
+    { id: "notifications", label: "Notifications", icon: Bell, color: "text-primary" },
+    { id: "family", label: "Family", icon: Users, color: "text-primary" },
+    { id: "analytics", label: "Analytics", icon: TrendingUp, color: "text-primary" },
+    { id: "settings", label: "Profile", icon: User, color: "text-primary" }
+  ];
+
+  return (
+    <div className="glass-card h-screen w-64 p-6 flex flex-col rounded-none border-r border-border">
+      {/* Logo */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-secondary flex items-center justify-center">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold">OikOS</h1>
+            <p className="text-xs text-muted-foreground">AI Household OS</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = currentScreen === item.id;
+
+          return (
+            <motion.button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                isActive
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'hover:bg-white/30 text-foreground'
+              }`}
+            >
+              <Icon className={`w-5 h-5 ${isActive ? '' : item.color}`} />
+              <span className="font-medium">{item.label}</span>
+            </motion.button>
+          );
+        })}
+      </nav>
+
+      {/* User Info */}
+      <div className="pt-6 border-t border-border">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/30">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-semibold">
+            JD
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium truncate">John Doe</div>
+            <div className="text-xs text-muted-foreground">Admin</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
