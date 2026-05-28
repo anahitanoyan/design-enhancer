@@ -12,9 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { usePrefs, type Lang, type Theme } from "@/lib/i18n";
 
 export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; onNavigate?: (screen: string) => void }) {
   const { user } = useAuth();
+  const { lang, setLang, theme, setTheme, t } = usePrefs();
   const defaultName = (user?.user_metadata?.display_name as string) || user?.email?.split("@")[0] || "Member";
   const [name, setName] = useState(defaultName);
   const [phone, setPhone] = useState("");
@@ -310,29 +312,38 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
           </div>
           <Separator />
 
-          <button className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors">
+          <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Palette className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm">Appearance</span>
+              <span className="text-sm">{t("theme")}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Light</span>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </div>
-          </button>
+            <Select value={theme} onValueChange={(v) => setTheme(v as Theme)}>
+              <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">{t("light")}</SelectItem>
+                <SelectItem value="dark">{t("dark")}</SelectItem>
+                <SelectItem value="system">{t("system")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <Separator />
 
-          <button className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors">
+          <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Globe className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm">Language</span>
+              <span className="text-sm">{t("language")}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">English</span>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </div>
-          </button>
+            <Select value={lang} onValueChange={(v) => setLang(v as Lang)}>
+              <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="ru">Русский</SelectItem>
+                <SelectItem value="hy">Հայերեն</SelectItem>
+                <SelectItem value="es">Español</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <Separator />
 
@@ -379,20 +390,26 @@ export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; 
           </div>
           <Separator />
 
-          <button className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors">
+          <button
+            onClick={() => onNavigate?.("billing")}
+            className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors"
+          >
             <div className="flex items-center gap-3">
               <CreditCard className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm">Billing & Subscription</span>
+              <span className="text-sm">{t("billing")}</span>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </button>
 
           <Separator />
 
-          <button className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors">
+          <button
+            onClick={() => onNavigate?.("help")}
+            className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors"
+          >
             <div className="flex items-center gap-3">
               <HelpCircle className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm">Help & Support</span>
+              <span className="text-sm">{t("help")}</span>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </button>
