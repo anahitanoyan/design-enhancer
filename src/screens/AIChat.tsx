@@ -1,9 +1,9 @@
 import { ArrowLeft, Sparkles, User, Bot } from "lucide-react";
-import { AICommandBar } from "../oikos/AICommandBar";
-import { GlassCard } from "../oikos/GlassCard";
-import { AIAgentStatus } from "../oikos/AIAgentStatus";
+import { AICommandBar } from "@/components/oikos/AICommandBar";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { AIAgentStatus } from "@/components/oikos/AIAgentStatus";
 import { useState } from "react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface Message {
   id: string;

@@ -1,8 +1,8 @@
 import { ArrowLeft, Plus, ShoppingCart, Sparkles, Share2, Download, Trash2 } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { Checkbox } from "../ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { StatusBadge } from "../oikos/StatusBadge";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatusBadge } from "@/components/oikos/StatusBadge";
 import { useState } from "react";
 
 interface GroceryItem {

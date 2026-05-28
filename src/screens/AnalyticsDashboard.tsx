@@ -1,6 +1,6 @@
 import { ArrowLeft, TrendingUp, Calendar, CheckSquare, ShoppingCart, Clock, Users, Sparkles } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { StatusBadge } from "../oikos/StatusBadge";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { StatusBadge } from "@/components/oikos/StatusBadge";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 export function AnalyticsDashboard({ onBack }: { onBack: () => void }) {

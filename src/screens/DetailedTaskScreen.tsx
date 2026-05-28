@@ -1,9 +1,9 @@
 import { ArrowLeft, Plus, CheckSquare, Filter, Search, Calendar, User, Flag } from "lucide-react";
-import { TaskCard } from "../oikos/TaskCard";
-import { GlassCard } from "../oikos/GlassCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { StatusBadge } from "../oikos/StatusBadge";
-import { Input } from "../ui/input";
+import { TaskCard } from "@/components/oikos/TaskCard";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatusBadge } from "@/components/oikos/StatusBadge";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 export function DetailedTaskScreen({ onBack }: { onBack: () => void }) {

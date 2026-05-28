@@ -1,13 +1,13 @@
 import { Bell } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { AICommandBar } from "../oikos/AICommandBar";
-import { CalendarCard } from "../oikos/CalendarCard";
-import { GroceryListCard } from "../oikos/GroceryListCard";
-import { FamilyMembersCard } from "../oikos/FamilyMembersCard";
-import { AIAgentPanel } from "../oikos/AIAgentPanel";
-import { AISuggestionCard } from "../oikos/AISuggestionCard";
-import { AIInsightCard } from "../oikos/AIInsightCard";
-import { FloatingAIButton } from "../oikos/FloatingAIButton";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { AICommandBar } from "@/components/oikos/AICommandBar";
+import { CalendarCard } from "@/components/oikos/CalendarCard";
+import { GroceryListCard } from "@/components/oikos/GroceryListCard";
+import { FamilyMembersCard } from "@/components/oikos/FamilyMembersCard";
+import { AIAgentPanel } from "@/components/oikos/AIAgentPanel";
+import { AISuggestionCard } from "@/components/oikos/AISuggestionCard";
+import { AIInsightCard } from "@/components/oikos/AIInsightCard";
+import { FloatingAIButton } from "@/components/oikos/FloatingAIButton";
 import { useState } from "react";
 
 export function EnhancedHomeDashboard({ onNavigate }: { onNavigate: (screen: string) => void }) {

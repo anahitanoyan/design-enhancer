@@ -1,8 +1,8 @@
 import { ArrowLeft, Users, Plus, Mail, Phone, Calendar, CheckSquare, Crown, Shield, User as UserIcon, MoreVertical, Edit, Trash2 } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { StatusBadge } from "../oikos/StatusBadge";
-import { Separator } from "../ui/separator";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { StatusBadge } from "@/components/oikos/StatusBadge";
+import { Separator } from "@/components/ui/separator";
 
 export function FamilyManagementScreen({ onBack }: { onBack: () => void }) {
   const familyMembers = [

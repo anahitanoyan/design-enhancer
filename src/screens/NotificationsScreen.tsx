@@ -1,6 +1,6 @@
 import { ArrowLeft, Bell } from "lucide-react";
-import { NotificationCard } from "../oikos/NotificationCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { NotificationCard } from "@/components/oikos/NotificationCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function NotificationsScreen({ onBack }: { onBack: () => void }) {
   const notifications = {

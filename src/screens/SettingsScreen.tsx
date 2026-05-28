@@ -1,7 +1,7 @@
 import { ArrowLeft, Settings, Users, Bell, Calendar, Sparkles, LogOut } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { FamilyMembersCard } from "../oikos/FamilyMembersCard";
-import { Switch } from "../ui/switch";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { FamilyMembersCard } from "@/components/oikos/FamilyMembersCard";
+import { Switch } from "@/components/ui/switch";
 
 export function SettingsScreen({ onBack }: { onBack: () => void }) {
   const familyMembers = [

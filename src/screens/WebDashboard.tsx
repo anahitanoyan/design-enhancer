@@ -1,14 +1,14 @@
 import { Calendar, CheckSquare, ShoppingCart, Bell, Sparkles, Bot, Users, Settings } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { AICommandBar } from "../oikos/AICommandBar";
-import { TaskCard } from "../oikos/TaskCard";
-import { NotificationCard } from "../oikos/NotificationCard";
-import { FamilyMembersCard } from "../oikos/FamilyMembersCard";
-import { StatusBadge } from "../oikos/StatusBadge";
-import { AIAgentStatus } from "../oikos/AIAgentStatus";
-import { Checkbox } from "../ui/checkbox";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { AICommandBar } from "@/components/oikos/AICommandBar";
+import { TaskCard } from "@/components/oikos/TaskCard";
+import { NotificationCard } from "@/components/oikos/NotificationCard";
+import { FamilyMembersCard } from "@/components/oikos/FamilyMembersCard";
+import { StatusBadge } from "@/components/oikos/StatusBadge";
+import { AIAgentStatus } from "@/components/oikos/AIAgentStatus";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function WebDashboard() {
   const [groceryItems, setGroceryItems] = useState([

@@ -1,6 +1,6 @@
 import { ArrowLeft, Plus, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState } from "react";
 
 export function ScheduleScreen({ onBack }: { onBack: () => void }) {

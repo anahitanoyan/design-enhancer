@@ -1,7 +1,7 @@
 import { AlertTriangle, Calendar, Clock, Users, ArrowRight, CheckCircle2, X } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { motion } from "motion/react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface Conflict {
   id: string;

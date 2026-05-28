@@ -1,8 +1,8 @@
 import { ArrowLeft, User, Bell, Lock, Palette, Globe, HelpCircle, LogOut, ChevronRight, Shield, CreditCard, Users, Sparkles, TrendingUp, Plus } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { Switch } from "../ui/switch";
-import { Separator } from "../ui/separator";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 
 export function UserProfileScreen({ onBack, onNavigate }: { onBack: () => void; onNavigate?: (screen: string) => void }) {
   const user = {

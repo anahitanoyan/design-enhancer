@@ -1,9 +1,9 @@
 import { ArrowLeft, Plus, Calendar, ChevronLeft, ChevronRight, Filter, Clock, MapPin, Users, Sparkles } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { StatusBadge } from "../oikos/StatusBadge";
-import { ConflictResolutionCard } from "../oikos/ConflictResolutionCard";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatusBadge } from "@/components/oikos/StatusBadge";
+import { ConflictResolutionCard } from "@/components/oikos/ConflictResolutionCard";
 import { useState } from "react";
 
 export function DetailedScheduleScreen({ onBack }: { onBack: () => void }) {

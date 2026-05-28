@@ -1,5 +1,5 @@
 import { ShoppingCart, Plus } from "lucide-react";
-import { Checkbox } from "../ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 
 interface GroceryItem {

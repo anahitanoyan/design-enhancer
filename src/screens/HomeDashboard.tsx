@@ -1,10 +1,10 @@
 import { CalendarDays, CheckSquare, Bell, ShoppingCart, Bot, Calendar } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { AICommandBar } from "../oikos/AICommandBar";
-import { CalendarCard } from "../oikos/CalendarCard";
-import { GroceryListCard } from "../oikos/GroceryListCard";
-import { FamilyMembersCard } from "../oikos/FamilyMembersCard";
-import { StatusBadge } from "../oikos/StatusBadge";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { AICommandBar } from "@/components/oikos/AICommandBar";
+import { CalendarCard } from "@/components/oikos/CalendarCard";
+import { GroceryListCard } from "@/components/oikos/GroceryListCard";
+import { FamilyMembersCard } from "@/components/oikos/FamilyMembersCard";
+import { StatusBadge } from "@/components/oikos/StatusBadge";
 import { useState } from "react";
 
 export function HomeDashboard({ onNavigate }: { onNavigate: (screen: string) => void }) {

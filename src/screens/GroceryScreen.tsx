@@ -1,6 +1,6 @@
 import { ArrowLeft, Plus, ShoppingCart, Sparkles } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { Checkbox } from "../ui/checkbox";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 
 export function GroceryScreen({ onBack }: { onBack: () => void }) {

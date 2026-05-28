@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { WebSidebar } from "../navigation/WebSidebar";
+import { WebSidebar } from "@/components/navigation/WebSidebar";
 import { EnhancedWebDashboard } from "./EnhancedWebDashboard";
 import { AIChat } from "./AIChat";
 import { DetailedScheduleScreen } from "./DetailedScheduleScreen";

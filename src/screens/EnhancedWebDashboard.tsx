@@ -1,16 +1,16 @@
 import { Calendar, CheckSquare, ShoppingCart, Bell, Settings } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
-import { AICommandBar } from "../oikos/AICommandBar";
-import { TaskCard } from "../oikos/TaskCard";
-import { NotificationCard } from "../oikos/NotificationCard";
-import { FamilyMembersCard } from "../oikos/FamilyMembersCard";
-import { AIAgentPanel } from "../oikos/AIAgentPanel";
-import { AISuggestionCard } from "../oikos/AISuggestionCard";
-import { AIInsightCard } from "../oikos/AIInsightCard";
-import { ConflictResolutionCard } from "../oikos/ConflictResolutionCard";
-import { Checkbox } from "../ui/checkbox";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { AICommandBar } from "@/components/oikos/AICommandBar";
+import { TaskCard } from "@/components/oikos/TaskCard";
+import { NotificationCard } from "@/components/oikos/NotificationCard";
+import { FamilyMembersCard } from "@/components/oikos/FamilyMembersCard";
+import { AIAgentPanel } from "@/components/oikos/AIAgentPanel";
+import { AISuggestionCard } from "@/components/oikos/AISuggestionCard";
+import { AIInsightCard } from "@/components/oikos/AIInsightCard";
+import { ConflictResolutionCard } from "@/components/oikos/ConflictResolutionCard";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function EnhancedWebDashboard() {
   const [groceryItems, setGroceryItems] = useState([

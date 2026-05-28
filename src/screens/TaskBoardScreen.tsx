@@ -1,6 +1,6 @@
 import { ArrowLeft, Plus, CheckSquare } from "lucide-react";
-import { TaskCard } from "../oikos/TaskCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { TaskCard } from "@/components/oikos/TaskCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function TaskBoardScreen({ onBack }: { onBack: () => void }) {
   const tasks = {

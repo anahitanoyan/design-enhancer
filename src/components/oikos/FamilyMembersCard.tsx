@@ -1,5 +1,5 @@
 import { Users } from "lucide-react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface FamilyMember {
   id: string;

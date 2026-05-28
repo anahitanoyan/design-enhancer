@@ -1,5 +1,5 @@
 import { Home, Users, Calendar, Sparkles } from "lucide-react";
-import { GlassCard } from "../oikos/GlassCard";
+import { GlassCard } from "@/components/oikos/GlassCard";
 import { useState } from "react";
 
 export function OnboardingScreen({ onComplete }: { onComplete: () => void }) {

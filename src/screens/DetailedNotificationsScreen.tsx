@@ -1,7 +1,7 @@
 import { ArrowLeft, Bell, Filter, Search, CheckCheck, Trash2 } from "lucide-react";
-import { NotificationCard } from "../oikos/NotificationCard";
-import { GlassCard } from "../oikos/GlassCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { NotificationCard } from "@/components/oikos/NotificationCard";
+import { GlassCard } from "@/components/oikos/GlassCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 
 export function DetailedNotificationsScreen({ onBack }: { onBack: () => void }) {
