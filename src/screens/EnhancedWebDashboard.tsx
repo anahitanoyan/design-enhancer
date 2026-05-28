@@ -10,12 +10,18 @@ import { AIInsightCard } from "@/components/oikos/AIInsightCard";
 import { ConflictResolutionCard } from "@/components/oikos/ConflictResolutionCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
 export function EnhancedWebDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const handleAICommand = (cmd: string) => {
+    if (typeof window !== "undefined") sessionStorage.setItem("oikos_pending_ai_prompt", cmd);
+    navigate({ to: "/ai" });
+  };
   const [groceryItems, setGroceryItems] = useState<Array<{ id: string; name: string; category: string; checked: boolean }>>([]);
   const [tasks, setTasks] = useState<Array<{ id: string; title: string; assignee: { name: string }; dueDate: string; priority: "low" | "medium" | "high"; category: string }>>([]);
   const [familyMembers, setFamilyMembers] = useState<Array<{ id: string; name: string; role: string; status: "active" | "away" }>>([]);
@@ -206,7 +212,7 @@ export function EnhancedWebDashboard() {
           {/* Center Column - Main Content */}
           <div className="col-span-6 space-y-6">
             {/* AI Command */}
-            <AICommandBar onSubmit={(cmd) => console.log(cmd)} placeholder="What can I help you with today?" />
+            <AICommandBar onSubmit={handleAICommand} placeholder="What can I help you with today?" />
 
             {/* AI Insights */}
             <AIInsightCard
