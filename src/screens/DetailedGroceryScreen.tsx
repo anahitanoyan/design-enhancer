@@ -100,6 +100,9 @@ export function DetailedGroceryScreen({ onBack }: { onBack: () => void }) {
       </div>
 
       <div className="flex-1 overflow-auto p-4 pb-24 space-y-4">
+        {loading && items.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-4">Loading…</p>
+        )}
         {/* Shopping Stats */}
         <GlassCard className="p-4">
           <div className="flex items-center justify-between mb-3">
