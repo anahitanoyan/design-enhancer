@@ -7,7 +7,7 @@ interface AIInsight {
   type: "analysis" | "warning" | "optimization" | "suggestion";
   title: string;
   description: string;
-  metrics?: Array<{ label: string; value: string; status?: "success" | "warning" | "alert" }>;
+  metrics?: Array<{ label: string; value: string; status?: "success" | "warning" | "alert" | "info" }>;
   actions?: Array<{ label: string; onClick: () => void }>;
 }
 
